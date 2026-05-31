@@ -2,9 +2,11 @@
 
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 
 export function PolicyPage({ content }: { content: string }) {
+  const tc = useTranslations('common')
   return (
     <div className="min-h-svh bg-background text-foreground">
       {/* Nav */}
@@ -21,13 +23,13 @@ export function PolicyPage({ content }: { content: string }) {
             href="/login"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            Sign in
+            {tc('signIn')}
           </Link>
           <Link
             href="/signup"
             className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-4 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
           >
-            Get started
+            {tc('getStarted')}
           </Link>
         </div>
       </nav>
@@ -66,8 +68,8 @@ export function PolicyPage({ content }: { content: string }) {
       <footer className="border-t border-border px-6 lg:px-10 py-6 flex items-center justify-between text-xs text-muted-foreground/50">
         <span>LLM Wiki</span>
         <div className="flex items-center gap-4">
-          <Link href="/terms" className="hover:text-muted-foreground transition-colors">Terms</Link>
-          <Link href="/privacy" className="hover:text-muted-foreground transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-muted-foreground transition-colors">{tc('terms')}</Link>
+          <Link href="/privacy" className="hover:text-muted-foreground transition-colors">{tc('privacy')}</Link>
         </div>
       </footer>
     </div>

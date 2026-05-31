@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronRight, FileText, NotepadText, Library,
@@ -61,6 +62,8 @@ export function KBSidenav({
   onGraphToggle,
   onOpenSourceDoc,
 }: KBSidenavProps) {
+  const t = useTranslations('kb')
+  const tc = useTranslations('common')
   const [searchOpen, setSearchOpen] = React.useState(false)
 
   React.useEffect(() => {
@@ -124,11 +127,11 @@ export function KBSidenav({
       <div className="shrink-0 px-2 pb-1 flex items-center gap-1.5">
         <button
           onClick={() => setSearchOpen(true)}
-          aria-label="Search pages and sources"
+          aria-label={t('searchPagesAndSources')}
           className="flex items-center gap-2 flex-1 px-2.5 py-1.5 text-xs text-muted-foreground/50 hover:text-muted-foreground border border-border hover:bg-accent rounded-md transition-colors cursor-pointer"
         >
           <SearchIcon className="size-3" />
-          <span className="flex-1 text-left">Search</span>
+          <span className="flex-1 text-left">{tc('search')}</span>
           <kbd className="text-[10px] text-muted-foreground/30 bg-muted px-1 rounded">{isMac ? '⌘K' : 'Ctrl+K'}</kbd>
         </button>
         <button
@@ -139,14 +142,14 @@ export function KBSidenav({
               ? 'bg-accent text-foreground border-border'
               : 'text-muted-foreground/50 hover:text-muted-foreground border-border hover:bg-accent',
           )}
-          title="Knowledge graph"
+          title={t('knowledgeGraph')}
         >
           <Network className="size-3" />
         </button>
         <button
           onClick={onUpload}
           className="flex items-center justify-center px-2.5 py-1.5 text-muted-foreground/50 hover:text-muted-foreground border border-border hover:bg-accent rounded-md transition-colors cursor-pointer"
-          title="Upload files"
+          title={t('uploadFiles')}
         >
           <Upload className="size-3" />
         </button>
@@ -154,11 +157,11 @@ export function KBSidenav({
 
       {/* Search palette */}
       <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-        <CommandInput placeholder="Jump to page, source, or action..." aria-label="Search pages and sources" />
+        <CommandInput placeholder={t('jumpTo')} aria-label={t('searchPagesAndSources')} />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>{t('noResults')}</CommandEmpty>
           {allSearchableItems.some((i) => i.type === 'wiki') && (
-            <CommandGroup heading="Wiki">
+            <CommandGroup heading={t('wikiSection')}>
               {allSearchableItems.filter((i) => i.type === 'wiki').map((item) => (
                 <CommandItem
                   key={`wiki-${item.path}`}
@@ -185,7 +188,7 @@ export function KBSidenav({
             </CommandGroup>
           )}
           {allSearchableItems.some((i) => i.type === 'source') && (
-            <CommandGroup heading="Sources">
+            <CommandGroup heading={t('sourcesSection')}>
               {allSearchableItems.filter((i) => i.type === 'source').map((item) => (
                 <CommandItem
                   key={`source-${item.doc?.id}`}
@@ -212,14 +215,14 @@ export function KBSidenav({
             </CommandGroup>
           )}
           <CommandSeparator />
-          <CommandGroup heading="Actions">
+          <CommandGroup heading={t('actionsSection')}>
             <CommandItem onSelect={() => { setSearchOpen(false); onFilesToggle() }}>
               <Folder className="size-3.5 mr-2 opacity-50" />
-              Browse Files
+              {t('browseFiles')}
             </CommandItem>
             <CommandItem onSelect={() => { setSearchOpen(false); onUpload() }}>
               <Upload className="size-3.5 mr-2 opacity-50" />
-              Upload Files
+              {t('uploadFiles')}
             </CommandItem>
           </CommandGroup>
         </CommandList>
@@ -229,7 +232,7 @@ export function KBSidenav({
       <div className="flex-1 min-h-0 flex flex-col px-2 pt-1">
         <div className="flex items-center px-2 mb-1 shrink-0">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-            Wiki
+            {t('wikiSection')}
           </span>
         </div>
         {loading ? (
@@ -249,14 +252,14 @@ export function KBSidenav({
         ) : (
           <div className="px-2 py-4 text-center">
             <BookOpen className="size-6 text-muted-foreground/20 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground mb-2">No wiki yet</p>
+            <p className="text-xs text-muted-foreground mb-2">{t('noWikiYet')}</p>
             <a
               href="https://claude.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              Open Claude
+              {t('openClaude')}
               <ArrowUpRight className="size-3" />
             </a>
           </div>
@@ -275,7 +278,7 @@ export function KBSidenav({
           )}
         >
           <Library className="size-3.5" />
-          <span className="flex-1 text-left">Sources</span>
+          <span className="flex-1 text-left">{t('sourcesSection')}</span>
           {sourceCount > 0 && (
             <span className="text-[10px] text-muted-foreground/30">{sourceCount}</span>
           )}
@@ -411,6 +414,7 @@ function formatBytes(bytes: number): string {
 }
 
 function PageUsageBar() {
+  const t = useTranslations('kb')
   const token = useUserStore((s) => s.accessToken)
   const [usage, setUsage] = React.useState<Usage | null>(null)
   const [modalOpen, setModalOpen] = React.useState(false)
@@ -437,7 +441,7 @@ function PageUsageBar() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
             <span className="text-[10px] text-muted-foreground/60 group-hover:text-muted-foreground transition-colors">
-              Storage
+              {t('storageUsage')}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors">
               {formatBytes(usage.total_storage_bytes)} / {formatBytes(usage.max_storage_bytes)}
@@ -455,12 +459,11 @@ function PageUsageBar() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Storage Usage</DialogTitle>
+            <DialogTitle>{t('storageUsage')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
             <p>
-              You've used <span className="font-medium text-foreground">{formatBytes(usage.total_storage_bytes)}</span> of
-              your <span className="font-medium text-foreground">{formatBytes(usage.max_storage_bytes)}</span> storage limit.
+              {t('storageUsageDesc', { used: formatBytes(usage.total_storage_bytes), total: formatBytes(usage.max_storage_bytes) })}
             </p>
             <div className="h-2 rounded-full bg-muted overflow-hidden">
               <div
@@ -469,7 +472,7 @@ function PageUsageBar() {
               />
             </div>
             <p>
-              Storage is consumed by uploaded files (PDFs, images, office documents). Notes and wiki pages are free and unlimited.
+              {t('storageNote')}
             </p>
           </div>
         </DialogContent>

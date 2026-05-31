@@ -15,7 +15,7 @@ import { GraphViewer } from '@/components/kb/GraphViewer'
 import { SelectionActionBar } from '@/components/kb/SelectionActionBar'
 import { WikiContent } from '@/components/wiki/WikiContent'
 import type { DocumentListItem, WikiNode } from '@/lib/types'
-import type { ViewMode } from '@/app/(dashboard)/wikis/[slug]/[[...path]]/page'
+import type { ViewMode } from '@/app/[locale]/(dashboard)/wikis/[slug]/[[...path]]/page'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 

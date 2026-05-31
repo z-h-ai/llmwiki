@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { UserMenu } from '@/components/layout/UserMenu'
 

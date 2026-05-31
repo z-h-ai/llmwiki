@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { ChevronsUpDown, Plus, Pencil, Trash2 } from 'lucide-react'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Command, CommandInput, CommandList, CommandItem, CommandEmpty, CommandGroup, CommandSeparator } from '@/components/ui/command'
@@ -9,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useKBStore } from '@/stores'
 
 export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string }) {
+  const t = useTranslations('kb')
+  const tc = useTranslations('common')
   const router = useRouter()
   const knowledgeBases = useKBStore((s) => s.knowledgeBases)
   const createKB = useKBStore((s) => s.createKB)
@@ -75,7 +78,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
           <button
             role="combobox"
             aria-expanded={open}
-            aria-label="Switch wiki"
+            aria-label={t('switchWiki')}
             className="flex items-center gap-1.5 w-full px-2 py-1.5 text-sm font-medium text-foreground hover:bg-accent rounded-md transition-colors cursor-pointer"
           >
             <span className="truncate flex-1 text-left">{kbName}</span>
@@ -84,10 +87,10 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
         </PopoverTrigger>
         <PopoverContent className="w-52 p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search wikis..." aria-label="Search wikis" value={search} onValueChange={setSearch} />
+            <CommandInput placeholder={t('searchWikis')} aria-label={t('searchWikis')} value={search} onValueChange={setSearch} />
             <CommandList>
-              <CommandEmpty>No wikis found.</CommandEmpty>
-              <CommandGroup heading="Wikis">
+              <CommandEmpty>{t('noWikisFound')}</CommandEmpty>
+              <CommandGroup heading={t('wikis')}>
                 {knowledgeBases.map((kb) => (
                   <CommandItem
                     key={kb.id}
@@ -104,7 +107,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
               {!search.trim() && (
                 <>
                   <CommandSeparator />
-                  <CommandGroup heading="Actions">
+                  <CommandGroup heading={t('actions')}>
                     <CommandItem
                       onSelect={() => {
                         setOpen(false)
@@ -113,7 +116,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
                       }}
                     >
                       <Pencil className="size-3.5 mr-2" />
-                      Rename
+                      {tc('rename')}
                     </CommandItem>
                     <CommandItem
                       onSelect={() => {
@@ -123,7 +126,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
                       className="text-destructive"
                     >
                       <Trash2 className="size-3.5 mr-2" />
-                      Delete
+                      {tc('delete')}
                     </CommandItem>
                     <CommandSeparator />
                     <CommandItem
@@ -133,7 +136,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
                       }}
                     >
                       <Plus className="size-3.5 mr-2" />
-                      Create Wiki
+                      {t('createWiki')}
                     </CommandItem>
                   </CommandGroup>
                 </>
@@ -146,7 +149,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create wiki</DialogTitle>
+            <DialogTitle>{t('createWiki')}</DialogTitle>
           </DialogHeader>
           <input
             value={newName}
@@ -162,7 +165,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
               disabled={creating || !newName.trim()}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50 cursor-pointer"
             >
-              {creating ? 'Creating...' : 'Create'}
+              {creating ? tc('creating') : tc('create')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -171,7 +174,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rename wiki</DialogTitle>
+            <DialogTitle>{t('renameWiki')}</DialogTitle>
           </DialogHeader>
           <input
             value={renameName}
@@ -186,7 +189,7 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
               disabled={renaming || !renameName.trim() || renameName.trim() === kbName}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50 cursor-pointer"
             >
-              {renaming ? 'Renaming...' : 'Rename'}
+              {renaming ? tc('renaming') : tc('rename')}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -195,24 +198,24 @@ export function WikiSelector({ kbName, kbId }: { kbName: string; kbId: string })
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete wiki</DialogTitle>
+            <DialogTitle>{t('deleteWiki')}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            This will permanently delete <strong>{kbName}</strong> and all its documents. This cannot be undone.
+            {t.rich('deleteWikiConfirm', { name: kbName, strong: (chunks) => <strong>{chunks}</strong> })}
           </p>
           <DialogFooter>
             <button
               onClick={() => setDeleteDialogOpen(false)}
               className="rounded-lg border border-input px-4 py-2 text-sm font-medium hover:bg-accent cursor-pointer"
             >
-              Cancel
+              {tc('cancel')}
             </button>
             <button
               onClick={handleDelete}
               disabled={deleting}
               className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:opacity-90 disabled:opacity-50 cursor-pointer"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? tc('deleting') : tc('delete')}
             </button>
           </DialogFooter>
         </DialogContent>
