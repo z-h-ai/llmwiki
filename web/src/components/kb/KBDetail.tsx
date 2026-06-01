@@ -174,15 +174,20 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
   const [wikiActivePath, setWikiActivePath] = React.useState<string | null>(null)
   const lastWikiDocNumberRef = React.useRef<number | null>(urlWikiDocNumber)
 
-  // Initialize wikiActivePath from ?p= on mount and when ?p= changes
+  // Initialize wikiActivePath from ?p= on mount and when ?p= changes.
+  // Uses a ref to skip re-runs caused by documents changing while urlWikiDocNumber
+  // is stale (useSearchParams doesn't update on window.history.replaceState).
+  const urlDocResolvedForRef = React.useRef<number | null>(null)
   React.useEffect(() => {
     if (urlWikiDocNumber == null) return
     if (!documents.length) return
+    if (urlDocResolvedForRef.current === urlWikiDocNumber) return
     const doc = documents.find((d) => d.document_number === urlWikiDocNumber)
     if (doc) {
       const path = (doc.path + doc.filename).replace(/^\/wiki\/?/, '')
       setWikiActivePath(path)
       lastWikiDocNumberRef.current = urlWikiDocNumber
+      urlDocResolvedForRef.current = urlWikiDocNumber
     }
   }, [urlWikiDocNumber, documents])
 
