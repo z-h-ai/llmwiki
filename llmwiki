@@ -254,9 +254,13 @@ def cmd_mcp(workspace: str) -> None:
         cmd_init(str(ws))
 
     os.chdir(MCP_DIR)
+    mcp_python = str(MCP_DIR / ".venv" / "bin" / "python")
+    if not Path(mcp_python).exists():
+        print(f"Error: MCP venv not found. Run: cd {MCP_DIR} && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt", file=sys.stderr)
+        sys.exit(1)
     os.execvpe(
-        sys.executable,
-        [sys.executable, "-m", "local_server", "--workspace", str(ws)],
+        mcp_python,
+        [mcp_python, "-m", "local_server", "--workspace", str(ws)],
         os.environ.copy(),
     )
 
