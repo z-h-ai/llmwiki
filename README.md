@@ -60,6 +60,18 @@ Then tell Claude: *"Read the guide, then ingest my sources and start building th
 
 Does everything: init if needed, start servers, open browser, print MCP config hint.
 
+### Setup scripts
+
+```bash
+./setup-mac.sh ~/research
+```
+
+```powershell
+.\setup-win.ps1 C:\research
+```
+
+Each script installs dependencies, initializes the workspace if needed, and starts the app.
+
 ## CLI
 
 | Command | What it does |
