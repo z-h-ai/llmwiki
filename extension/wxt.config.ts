@@ -1,4 +1,6 @@
 import { defineConfig } from "wxt";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 export default defineConfig({
   srcDir: "src",
@@ -7,13 +9,10 @@ export default defineConfig({
   //   - Persistent profile so the Google/Supabase sign-in survives reloads
   //   - Opens a known testbed URL so we can verify the content script bootstraps
   //     against a real site (CSP, CORS, real DOM)
-  //   - Uses your actual Chrome binary, in a separate profile dir, so this
-  //     doesn't interfere with your normal browsing session
+  //   - Uses a separate profile dir, so this doesn't interfere with your
+  //     normal browsing session
   runner: {
-    binaries: {
-      chrome: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-    },
-    chromiumProfile: "/tmp/llmwiki-ext-profile",
+    chromiumProfile: join(tmpdir(), "llmwiki-ext-profile"),
     keepProfileChanges: true,
     startUrls: ["https://example.com/"],
   },

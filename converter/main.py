@@ -186,7 +186,7 @@ async def extract(
 
     _validate_s3_url(req.source_url)
 
-    with tempfile.TemporaryDirectory(dir="/tmp/conversions") as tmpdir:
+    with tempfile.TemporaryDirectory(prefix="conversions_") as tmpdir:
         source_path = Path(tmpdir) / f"source.{ext}"
 
         # Stream the download and abort if the file exceeds MAX_SOURCE_BYTES.

@@ -26,6 +26,10 @@ MCP_DIR = REPO_ROOT / "mcp"
 WEB_DIR = REPO_ROOT / "web"
 
 
+def _to_virtual(relative: str) -> str:
+    return relative.replace("\\", "/")
+
+
 def _sanitize_name(name: str) -> str:
     slug = name.lower().strip()
     slug = re.sub(r"[^a-z0-9\s-]", "", slug)
@@ -135,7 +139,7 @@ def _index_existing_files(ws: Path, db_path: Path, user_id: str, ws_id: str) -> 
                 continue
 
             full = Path(root_path) / filename
-            relative = str(full.relative_to(ws))
+            relative = _to_virtual(str(full.relative_to(ws)))
 
             if relative in existing:
                 continue
@@ -254,13 +258,21 @@ def cmd_mcp(workspace: str) -> None:
         cmd_init(str(ws))
 
     os.chdir(MCP_DIR)
-    mcp_python = str(MCP_DIR / ".venv" / "bin" / "python")
+    if os.name == "nt":
+        mcp_python = str(MCP_DIR / ".venv" / "Scripts" / "python.exe")
+        activate_hint = ".venv\\Scripts\\activate"
+    else:
+        mcp_python = str(MCP_DIR / ".venv" / "bin" / "python")
+        activate_hint = "source .venv/bin/activate"
     if not Path(mcp_python).exists():
-        print(f"Error: MCP venv not found. Run: cd {MCP_DIR} && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt", file=sys.stderr)
+        print(f"Error: MCP venv not found. Run: cd {MCP_DIR} && python3 -m venv .venv && {activate_hint} && pip install -r requirements.txt", file=sys.stderr)
         sys.exit(1)
+    argv = [mcp_python, "-m", "local_server", "--workspace", str(ws)]
+    if os.name == "nt":
+        raise SystemExit(subprocess.run(argv, env=os.environ.copy()).returncode)
     os.execvpe(
         mcp_python,
-        [mcp_python, "-m", "local_server", "--workspace", str(ws)],
+        argv,
         os.environ.copy(),
     )
 

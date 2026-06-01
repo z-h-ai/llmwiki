@@ -48,6 +48,10 @@ _sync_status: dict = {
 }
 
 
+def _to_virtual(relative: str) -> str:
+    return relative.replace("\\", "/")
+
+
 def get_sync_status() -> dict:
     """Return a copy of the current sync status."""
     return dict(_sync_status)
@@ -112,7 +116,7 @@ def _should_ignore(path: Path, workspace: Path) -> bool:
     except ValueError:
         return True
 
-    relative_str = str(relative)
+    relative_str = _to_virtual(str(relative))
     parts = relative.parts
 
     # Built-in ignores
@@ -136,7 +140,7 @@ def _get_source_kind(relative_path: str) -> str:
 
 def _file_lock_key(workspace: Path, file_path: Path) -> str:
     try:
-        return str(file_path.relative_to(workspace))
+        return _to_virtual(str(file_path.relative_to(workspace)))
     except ValueError:
         return str(file_path.resolve())
 
@@ -157,7 +161,7 @@ async def _index_file(db: aiosqlite.Connection, workspace: Path, file_path: Path
 
 
 async def _index_file_locked(db: aiosqlite.Connection, workspace: Path, file_path: Path) -> None:
-    relative = str(file_path.relative_to(workspace))
+    relative = _to_virtual(str(file_path.relative_to(workspace)))
     filename = file_path.name
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
 
@@ -259,7 +263,7 @@ async def _remove_file(db: aiosqlite.Connection, workspace: Path, file_path: Pat
 
 async def _remove_file_locked(db: aiosqlite.Connection, workspace: Path, file_path: Path) -> None:
     try:
-        relative = str(file_path.relative_to(workspace))
+        relative = _to_virtual(str(file_path.relative_to(workspace)))
     except ValueError:
         return
 
@@ -357,7 +361,7 @@ async def reconcile(db: aiosqlite.Connection, workspace: Path) -> None:
                     full_path = Path(root) / fname
                     if _should_ignore(full_path, workspace):
                         continue
-                    relative = str(full_path.relative_to(workspace))
+                    relative = _to_virtual(str(full_path.relative_to(workspace)))
                     disk_files[relative] = full_path
 
         _sync_status["total"] = len(disk_files)
