@@ -29,7 +29,7 @@ export default function NewKnowledgeBasePage() {
       const kb = await createKB(trimmed, description.trim() || undefined)
       router.push(`/wikis/${kb.slug}`)
     } catch (err) {
-      setError((err as Error).message || 'Failed to create wiki')
+      setError((err as Error).message || t('failedCreateWiki'))
       setLoading(false)
     }
   }

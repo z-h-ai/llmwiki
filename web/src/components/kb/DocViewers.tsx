@@ -5,6 +5,7 @@ import { Loader2, FileText } from 'lucide-react'
 import { useUserStore } from '@/stores'
 import { apiFetch } from '@/lib/api'
 import dynamic from 'next/dynamic'
+import { useTranslations } from 'next-intl'
 
 const PdfViewer = dynamic(() => import('@/components/viewer/PdfViewer'), { ssr: false })
 const HtmlViewer = dynamic(() => import('@/components/viewer/HtmlViewer'), { ssr: false })
@@ -47,15 +48,17 @@ function ErrorMessage({ message }: { message: string }) {
 }
 
 export function PdfDocViewer({ documentId, title, initialPage, hideToolbar }: { documentId: string; title: string; initialPage?: number; hideToolbar?: boolean }) {
+  const t = useTranslations('viewer')
   const { url, error } = useDocumentUrl(documentId)
-  if (error) return <ErrorMessage message="Failed to load PDF" />
+  if (error) return <ErrorMessage message={t('failedLoadPdf')} />
   if (!url) return <LoadingSpinner />
   return <PdfViewer fileUrl={url} title={title} initialPage={initialPage} hideToolbar={hideToolbar} />
 }
 
 export function ImageViewer({ documentId, title }: { documentId: string; title: string }) {
+  const t = useTranslations('viewer')
   const { url, error } = useDocumentUrl(documentId)
-  if (error) return <ErrorMessage message="Failed to load image" />
+  if (error) return <ErrorMessage message={t('failedLoadImage')} />
   if (!url) return <LoadingSpinner />
 
   return (
@@ -76,13 +79,15 @@ export function HtmlDocViewer({ documentId, title: _title }: { documentId: strin
 /** Legacy iframe-based viewer for the original tagged HTML. Kept for the
  *  future "View original" toggle; not the default surface for clips. */
 export function HtmlOriginalViewer({ documentId, title: _title }: { documentId: string; title: string }) {
+  const t = useTranslations('viewer')
   const { url, error } = useDocumentUrl(documentId)
-  if (error) return <ErrorMessage message="Failed to load HTML" />
+  if (error) return <ErrorMessage message={t('failedLoadHtml')} />
   if (!url) return <LoadingSpinner />
   return <HtmlViewer fileUrl={url} className="h-full" />
 }
 
 export function ContentViewer({ documentId, title, fileType }: { documentId: string; title: string; fileType: string }) {
+  const t = useTranslations('viewer')
   const token = useUserStore((s) => s.accessToken)
   const [content, setContent] = React.useState<string | null>(null)
   const [error, setError] = React.useState(false)
@@ -96,7 +101,7 @@ export function ContentViewer({ documentId, title, fileType }: { documentId: str
     return () => { cancelled = true }
   }, [documentId, token])
 
-  if (error) return <ErrorMessage message="Failed to load content" />
+  if (error) return <ErrorMessage message={t('failedLoadContent')} />
   if (content === null) return <LoadingSpinner />
 
   const isHtml = fileType === 'html' || fileType === 'htm'
@@ -122,6 +127,7 @@ export function ContentViewer({ documentId, title, fileType }: { documentId: str
 }
 
 export function UnsupportedViewer({ title }: { title: string }) {
+  const t = useTranslations('viewer')
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
       <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-muted">
@@ -129,25 +135,27 @@ export function UnsupportedViewer({ title }: { title: string }) {
       </div>
       <div className="text-center">
         <h1 className="text-lg font-medium">{title}</h1>
-        <p className="text-xs text-muted-foreground mt-2">File viewer coming soon</p>
+        <p className="text-xs text-muted-foreground mt-2">{t('fileViewerComingSoon')}</p>
       </div>
     </div>
   )
 }
 
 export function ProcessingViewer({ title }: { title: string }) {
+  const t = useTranslations('viewer')
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
       <Loader2 className="size-8 animate-spin text-muted-foreground" />
       <div className="text-center">
         <h1 className="text-lg font-medium">{title}</h1>
-        <p className="text-xs text-muted-foreground mt-2">Processing document...</p>
+        <p className="text-xs text-muted-foreground mt-2">{t('processingDocument')}</p>
       </div>
     </div>
   )
 }
 
 export function FailedViewer({ title, errorMessage }: { title: string; errorMessage?: string | null }) {
+  const t = useTranslations('viewer')
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
       <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-destructive/10">
@@ -155,7 +163,7 @@ export function FailedViewer({ title, errorMessage }: { title: string; errorMess
       </div>
       <div className="text-center">
         <h1 className="text-lg font-medium">{title}</h1>
-        <p className="text-xs text-destructive mt-2">Processing failed</p>
+        <p className="text-xs text-destructive mt-2">{t('processingFailed')}</p>
         {errorMessage && (
           <p className="text-xs text-muted-foreground mt-1 max-w-sm">{errorMessage}</p>
         )}

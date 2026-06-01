@@ -23,7 +23,7 @@ function OAuthConsentContent() {
 
   React.useEffect(() => {
     if (!authorizationId) {
-      setError('Missing authorization_id')
+      setError(t('missingAuthorization'))
       setLoading(false)
       return
     }
@@ -47,7 +47,7 @@ function OAuthConsentContent() {
         setLoading(false)
       }
     })
-  }, [authorizationId])
+  }, [authorizationId, t])
 
   const handleApprove = async () => {
     if (!authorizationId || submitting) return
@@ -127,7 +127,7 @@ function OAuthConsentContent() {
 
   const rawName = details?.client?.name || ''
   const isClaude = rawName.toLowerCase().includes('claude') || rawName.toLowerCase().includes('anthropic')
-  const clientName = isClaude ? 'Claude' : rawName || 'An MCP client'
+  const clientName = isClaude ? 'Claude' : rawName || t('mcpClient')
 
   return (
     <div className="min-h-svh flex items-center justify-center bg-background p-8">

@@ -6,6 +6,7 @@ import { useKBStore, useUserStore } from '@/stores'
 import { useKBDocuments } from '@/hooks/useKBDocuments'
 import { KBDetail } from '@/components/kb/KBDetail'
 import { Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export type ViewMode = 'wiki' | 'files' | 'graph'
 
@@ -34,6 +35,7 @@ function parseRoute(pathSegments?: string[]): ParsedRoute {
 }
 
 export default function KBPage() {
+  const t = useTranslations('kb')
   const router = useRouter()
   const params = useParams<{ slug: string; path?: string[] }>()
   const searchParams = useSearchParams()
@@ -79,9 +81,9 @@ export default function KBPage() {
   if (!kb) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 bg-background">
-        <h1 className="text-lg font-medium">Wiki not found</h1>
+        <h1 className="text-lg font-medium">{t('wikiNotFound')}</h1>
         <p className="text-sm text-muted-foreground">
-          The wiki &ldquo;{params.slug}&rdquo; does not exist or you don&apos;t have access.
+          {t('wikiNotFoundDesc', { slug: params.slug })}
         </p>
       </div>
     )

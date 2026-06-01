@@ -13,6 +13,7 @@ import { decorationsFromHighlights } from '@/lib/highlights/applyHighlights'
 import { highlightPluginKey } from '@/lib/highlights/decorationPlugin'
 import { sanitizeUrl } from '@/components/editor/PropertyEditors'
 import type { Highlight, HighlightsResponse } from '@/lib/highlights/types'
+import { useTranslations } from 'next-intl'
 
 interface ContentResponse {
   id: string
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export default function MarkdownClipViewer({ documentId, className }: Props) {
+  const t = useTranslations('viewer')
   const token = useUserStore((s) => s.accessToken)
   const [markdown, setMarkdown] = React.useState<string | null>(null)
   const [highlights, setHighlights] = React.useState<Highlight[] | null>(null)
@@ -82,13 +84,13 @@ export default function MarkdownClipViewer({ documentId, className }: Props) {
       })
 
     Promise.all([loadContent, loadHighlights]).catch((err) => {
-      if (!cancelled) setError(err?.message ?? 'Failed to load document')
+      if (!cancelled) setError(err?.message ?? t('failedLoadDocument'))
     })
 
     return () => {
       cancelled = true
     }
-  }, [documentId, token])
+  }, [documentId, token, t])
 
   // Set content on the editor once markdown is loaded.
   React.useEffect(() => {

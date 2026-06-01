@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server'
-import { privacy } from '@/content/privacy'
+import { privacyByLocale, type PrivacyLocale } from '@/content/privacy'
 import { PolicyPage } from '@/components/PolicyPage'
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -11,6 +11,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   }
 }
 
-export default function PrivacyPage() {
-  return <PolicyPage content={privacy} />
+export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params
+  const content = privacyByLocale[(locale as PrivacyLocale) in privacyByLocale ? locale as PrivacyLocale : 'zh']
+  return <PolicyPage content={content} />
 }

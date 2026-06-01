@@ -95,7 +95,7 @@ export default function App() {
           <h1 className="text-base font-semibold text-gray-900">LLM Wiki</h1>
           {mode === "local" && (
             <span className="text-[10px] font-medium text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-              local
+              本地
             </span>
           )}
         </div>
@@ -105,14 +105,14 @@ export default function App() {
               onClick={handleSignOut}
               className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
-              Sign out
+              退出登录
             </button>
           )}
           <button
             onClick={() => setView("settings")}
             className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
-            Settings
+            设置
           </button>
         </div>
       </div>

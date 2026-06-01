@@ -15,6 +15,7 @@ import { useUserStore } from '@/stores'
 import { MermaidBlock } from './MermaidBlock'
 import { ExpandableMedia } from './DiagramViewer'
 import type { DocumentListItem } from '@/lib/types'
+import { useTranslations } from 'next-intl'
 
 export interface TocItem {
   id: string
@@ -63,6 +64,7 @@ function stripLeadingH1(content: string, title: string): string {
 }
 
 function TableOfContents({ items }: { items: TocItem[] }) {
+  const t = useTranslations('wikiContent')
   const [activeId, setActiveId] = React.useState<string | null>(null)
 
   React.useEffect(() => {
@@ -98,7 +100,7 @@ function TableOfContents({ items }: { items: TocItem[] }) {
   return (
     <nav className="space-y-0.5">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 mb-2 px-1">
-        On this page
+        {t('onThisPage')}
       </p>
       {items.map((item) => (
         <a
@@ -349,6 +351,7 @@ interface WikiContentProps {
 }
 
 export function WikiContent({ content, title, onNavigate, onSourceClick, onGraphClick, documents }: WikiContentProps) {
+  const t = useTranslations('wikiContent')
   const processedContent = React.useMemo(() => stripLeadingH1(content, title), [content, title])
   const tocItems = React.useMemo(() => extractTocFromMarkdown(processedContent), [processedContent])
   const footnoteSources = React.useMemo(() => parseFootnoteSources(processedContent), [processedContent])
@@ -651,7 +654,7 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
           return (
             <section className="mt-12 pt-6 border-t border-border">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 mb-3">
-                Sources
+                {t('sources')}
               </p>
               <ol className="list-decimal pl-5 space-y-1.5">
                 {entries.map(([num, source]) => {
@@ -674,7 +677,7 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
         return <section {...props}>{children}</section>
       },
     }),
-    [onNavigate, onSourceClick, footnoteSources, documents],
+    [onNavigate, onSourceClick, footnoteSources, documents, t],
   )
 
   const hasToc = tocItems.length > 0
@@ -700,14 +703,14 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
                   <button
                     onClick={handleCopy}
                     className="p-1.5 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-accent transition-colors cursor-pointer"
-                    title="Copy markdown"
+                    title={t('copyMarkdown')}
                   >
                     {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                   </button>
                   {/* <button
                     onClick={handleDownload}
                     className="p-1.5 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-accent transition-colors cursor-pointer"
-                    title="Download as .md"
+                    title={t('downloadMarkdown')}
                   >
                     <Download className="size-3.5" />
                   </button> */}
@@ -715,7 +718,7 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
                     <button
                       onClick={onGraphClick}
                       className="p-1.5 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-accent transition-colors cursor-pointer"
-                      title="Show in graph"
+                      title={t('showInGraph')}
                     >
                       <Network className="size-3.5" />
                     </button>

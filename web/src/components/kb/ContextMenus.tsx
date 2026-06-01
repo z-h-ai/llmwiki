@@ -3,6 +3,7 @@
 import * as React from 'react'
 import ReactDOM from 'react-dom'
 import { Pencil, Trash2, NotepadText, Folder, Upload } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface ContextMenuProps {
   open: boolean
@@ -34,6 +35,7 @@ function useContextMenuDismiss(open: boolean, onClose: () => void, menuRef: Reac
 export function SourceContextMenu({
   open, x, y, onRename, onDelete, onClose,
 }: ContextMenuProps & { onRename: () => void; onDelete: () => void }) {
+  const t = useTranslations('common')
   const menuRef = React.useRef<HTMLDivElement>(null)
   useContextMenuDismiss(open, onClose, menuRef)
 
@@ -50,7 +52,7 @@ export function SourceContextMenu({
         className="flex items-center gap-2 w-full rounded-sm px-2 py-1.5 text-sm hover:bg-accent cursor-pointer"
       >
         <Pencil className="size-3.5" />
-        Rename
+        {t('rename')}
       </button>
       <div className="h-px bg-border -mx-1 my-1" />
       <button
@@ -58,7 +60,7 @@ export function SourceContextMenu({
         className="flex items-center gap-2 w-full rounded-sm px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10 cursor-pointer"
       >
         <Trash2 className="size-3.5" />
-        Delete
+        {t('delete')}
       </button>
     </div>,
     document.body,
@@ -68,6 +70,7 @@ export function SourceContextMenu({
 export function SourceAreaContextMenu({
   open, x, y, onNewNote, onNewFolder, onUpload, onClose,
 }: ContextMenuProps & { onNewNote: () => void; onNewFolder: () => void; onUpload: () => void }) {
+  const t = useTranslations('kb')
   const menuRef = React.useRef<HTMLDivElement>(null)
   useContextMenuDismiss(open, onClose, menuRef)
 
@@ -84,14 +87,14 @@ export function SourceAreaContextMenu({
         className="flex items-center gap-2 w-full rounded-sm px-2 py-1.5 text-sm hover:bg-accent cursor-pointer"
       >
         <NotepadText className="size-3.5" />
-        New Note
+        {t('newNote')}
       </button>
       <button
         onClick={onNewFolder}
         className="flex items-center gap-2 w-full rounded-sm px-2 py-1.5 text-sm hover:bg-accent cursor-pointer"
       >
         <Folder className="size-3.5" />
-        New Folder
+        {t('newFolder')}
       </button>
       <div className="h-px bg-border -mx-1 my-1" />
       <button
@@ -99,7 +102,7 @@ export function SourceAreaContextMenu({
         className="flex items-center gap-2 w-full rounded-sm px-2 py-1.5 text-sm hover:bg-accent cursor-pointer"
       >
         <Upload className="size-3.5" />
-        Upload Files
+        {t('uploadFiles')}
       </button>
     </div>,
     document.body,

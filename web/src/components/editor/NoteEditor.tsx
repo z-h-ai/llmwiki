@@ -23,6 +23,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar'
 import type { Editor } from '@tiptap/react'
 import type { PropertyType, TypedProperty, PropertyMap } from '@/lib/types'
+import { useTranslations } from 'next-intl'
 
 const AUTOSAVE_DELAY = 1500
 
@@ -91,6 +92,7 @@ export function NoteEditor({
   onEditorReady,
   titleChangeRef,
 }: NoteEditorProps) {
+  const t = useTranslations('editor')
   const [title, setTitle] = React.useState(initialTitle ?? '')
   const [date, setDate] = React.useState<string>(initialDate ?? '')
   const [tags, setTags] = React.useState<string[]>(initialTags ?? [])
@@ -122,7 +124,7 @@ export function NoteEditor({
         heading: { levels: [1, 2, 3] },
         link: false,
       }),
-      Placeholder.configure({ placeholder: 'Start writing...' }),
+      Placeholder.configure({ placeholder: t('startWriting') }),
       Typography,
       Link.configure({ autolink: true, openOnClick: false }),
       Image.configure({ inline: false, allowBase64: true }),
@@ -464,7 +466,7 @@ export function NoteEditor({
       {!hideToolbar && (
         <NoteToolbar
           editor={editor}
-          backLabel={backLabel ?? 'Back'}
+          backLabel={backLabel ?? t('back')}
           noteTitle={title}
           onTitleChange={embedded ? (val: string) => {
             const sanitized = sanitizeTitle(val)
@@ -495,7 +497,7 @@ export function NoteEditor({
               type="text"
               value={title}
               onChange={handleTitleChange}
-              placeholder="Untitled"
+              placeholder={t('untitled')}
               className="w-full text-2xl font-bold text-foreground bg-transparent border-none outline-none placeholder:text-muted-foreground/30 mb-4"
             />
           )}
@@ -507,7 +509,7 @@ export function NoteEditor({
             >
               {date && <span className="bg-muted px-1.5 py-0.5 rounded text-[11px]">{date}</span>}
               {tags.length > 0 && (
-                <span className="bg-muted px-1.5 py-0.5 rounded text-[11px]">{tags.length} tag{tags.length !== 1 ? 's' : ''}</span>
+                <span className="bg-muted px-1.5 py-0.5 rounded text-[11px]">{t('tagCount', { count: tags.length })}</span>
               )}
             </button>
           )}
@@ -517,14 +519,14 @@ export function NoteEditor({
               className="flex items-center gap-1.5 mb-4 text-xs text-muted-foreground/30 hover:text-muted-foreground transition-colors cursor-pointer"
             >
               <Plus className="size-3" />
-              Add metadata
+              {t('addMetadata')}
             </button>
           )}
           {metaExpanded && <div className="mb-6 space-y-0.5">
             <div className="flex items-center h-8">
               <div className="flex items-center gap-2 w-24 shrink-0">
                 <CalendarIcon className="size-3.5 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">date</span>
+                <span className="text-sm text-muted-foreground">{t('date')}</span>
               </div>
               <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                 <PopoverTrigger asChild>
@@ -534,7 +536,7 @@ export function NoteEditor({
                       date ? 'text-foreground' : 'text-muted-foreground/40'
                     )}
                   >
-                    {dateValue ? format(dateValue, 'PPP') : 'Pick a date'}
+                    {dateValue ? format(dateValue, 'PPP') : t('pickDate')}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -584,7 +586,7 @@ export function NoteEditor({
               className="flex items-center gap-1.5 h-7 text-sm text-muted-foreground/30 hover:text-muted-foreground transition-colors cursor-pointer"
             >
               <ChevronUp className="size-3.5" />
-              <span>Collapse</span>
+              <span>{t('collapse')}</span>
             </button>
           </div>}
 
@@ -592,7 +594,7 @@ export function NoteEditor({
             <EditorContent editor={editor} />
           ) : (
             <div className="flex min-h-[240px] items-center justify-center">
-              <span className="text-sm text-muted-foreground">Loading note...</span>
+              <span className="text-sm text-muted-foreground">{t('loadingNote')}</span>
             </div>
           )}
         </div>
@@ -603,10 +605,10 @@ export function NoteEditor({
         embedded ? 'px-4 border-t border-border' : 'px-5 bg-background',
       )}>
         <span className="text-[10px] text-muted-foreground mr-3">
-          {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : ''}
+          {saveStatus === 'saving' ? t('saving') : saveStatus === 'saved' ? t('saved') : ''}
         </span>
         <span className="text-[10px] text-muted-foreground tabular-nums">
-          {wordCount} {wordCount === 1 ? 'word' : 'words'}
+          {t('wordCount', { count: wordCount })}
         </span>
       </div>
     </div>

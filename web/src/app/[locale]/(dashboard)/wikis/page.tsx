@@ -50,7 +50,7 @@ export default function WikisPage() {
     try {
       const email = user?.email || 'My'
       const displayName = email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1)
-      const kb = await createKB(`${displayName}'s Wiki`)
+      const kb = await createKB(t('defaultWikiName', { name: displayName }))
       router.push(`/wikis/${kb.slug}`)
     } catch (err) {
       console.error('Failed to create KB:', err)

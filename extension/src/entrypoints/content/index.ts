@@ -306,13 +306,13 @@ class HighlightController {
     const pill = document.createElement("div");
     pill.className = "llmwiki-pill";
     const highlightBtn = document.createElement("button");
-    highlightBtn.textContent = "Highlight";
+    highlightBtn.textContent = "划线";
     highlightBtn.onclick = (ev) => {
       ev.preventDefault();
       this.handleHighlight(range, false);
     };
     const noteBtn = document.createElement("button");
-    noteBtn.textContent = "Note";
+    noteBtn.textContent = "备注";
     noteBtn.onclick = (ev) => {
       ev.preventDefault();
       this.handleHighlight(range, true);
@@ -370,7 +370,7 @@ class HighlightController {
     const popover = document.createElement("div");
     popover.className = "llmwiki-popover";
     const textarea = document.createElement("textarea");
-    textarea.placeholder = "Add a note…";
+    textarea.placeholder = "添加备注...";
     textarea.value = highlight.comment ?? "";
     popover.appendChild(textarea);
     const row = document.createElement("div");
@@ -379,11 +379,11 @@ class HighlightController {
     actions.className = "llmwiki-actions";
     const cancel = document.createElement("button");
     cancel.className = "llmwiki-cancel";
-    cancel.textContent = "Cancel";
+    cancel.textContent = "取消";
     cancel.onclick = () => this.removePopover();
     const save = document.createElement("button");
     save.className = "llmwiki-save";
-    save.textContent = "Save";
+    save.textContent = "保存";
     save.onclick = () => {
       const value = textarea.value.trim() || null;
       highlight.comment = value;
@@ -409,7 +409,7 @@ class HighlightController {
     const popover = document.createElement("div");
     popover.className = "llmwiki-popover";
     const textarea = document.createElement("textarea");
-    textarea.placeholder = "Add a note…";
+    textarea.placeholder = "添加备注...";
     textarea.value = highlight.comment ?? "";
     popover.appendChild(textarea);
 
@@ -417,7 +417,7 @@ class HighlightController {
     row.className = "llmwiki-row";
     const del = document.createElement("button");
     del.className = "llmwiki-delete";
-    del.textContent = "Delete";
+    del.textContent = "删除";
     del.onclick = () => {
       this.deleteHighlight(id);
       this.removePopover();
@@ -426,11 +426,11 @@ class HighlightController {
     actions.className = "llmwiki-actions";
     const cancel = document.createElement("button");
     cancel.className = "llmwiki-cancel";
-    cancel.textContent = "Cancel";
+    cancel.textContent = "取消";
     cancel.onclick = () => this.removePopover();
     const save = document.createElement("button");
     save.className = "llmwiki-save";
-    save.textContent = "Save";
+    save.textContent = "保存";
     save.onclick = () => {
       const value = textarea.value.trim() || null;
       highlight.comment = value;

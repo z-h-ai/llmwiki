@@ -1,4 +1,5 @@
-export const privacy = `# Privacy Policy
+export const privacyByLocale = {
+  en: `# Privacy Policy
 
 **LLM Wiki** · Effective date: April 26, 2026
 
@@ -110,4 +111,120 @@ We may update this policy from time to time. We will notify you of material chan
 ## Contact
 
 For privacy questions or data requests: lucas@llmwiki.app
-`
+`,
+  zh: `# 隐私政策
+
+**LLM Wiki** · 生效日期：2026 年 4 月 26 日
+
+LLM Wiki 由 Polybius, L.L.C. 运营，Polybius, L.L.C. 是一家 Delaware limited liability company（以下简称 “Polybius”、“我们”）。LLM Wiki 是一个免费、开源的知识库服务，网址为 llmwiki.app。本政策说明我们收集哪些数据、如何使用这些数据，以及你对这些数据享有哪些权利。
+
+## 我们收集什么
+
+### 账户信息
+当你注册时，我们会通过 Supabase Auth 收集你的邮箱地址和显示名称。如果你使用 Google OAuth 登录，我们会从 Google 接收你的姓名、邮箱和头像。我们不会存储你的 Google 密码。
+
+### 你上传的内容
+你添加到知识库中的文档、笔记、PDF 和其他文件会存储在我们的基础设施中。这包括原始文件、提取出的文本和生成的 Wiki 页面。这是本服务的核心功能：我们存储你的内容，以便你和你连接的 AI 工具可以访问它。
+
+### 处理后的内容
+当你上传 PDF 或 Office 文档时，我们会在服务端处理它们以提取文本。提取出的文本会与原始文件一起存储。
+
+### 浏览器扩展数据
+如果你使用 LLM Wiki Chrome 扩展，它会捕获你明确选择保存的网页文本内容。扩展只会在你点击保存按钮时激活，不会被动监控你的浏览行为。页面内容会直接发送到我们的 API，并存储在你的知识库中。
+
+### 使用数据
+我们会收集基础使用分析数据：页面访问、功能使用和错误日志。我们不使用第三方跟踪脚本或广告像素。
+
+## 你的内容如何存储
+
+| 组件 | 服务提供方 | 位置 | 用途 |
+|------|------------|------|------|
+| 数据库 | Supabase (Postgres) | AWS US regions | 账户数据、文档、Wiki 页面、元数据 |
+| 文件存储 | Amazon S3 | US East | 原始上传文件（PDF、图片） |
+| API 托管 | Railway | US regions | API 和 MCP 服务器 |
+| 前端托管 | Netlify | Global CDN | Web 应用 |
+
+所有数据在静态存储时使用 AES-256 加密，在传输中使用 TLS 1.2+ 加密。数据库访问通过行级安全策略（RLS）执行，每个用户只能访问自己的数据。
+
+## 会处理你内容的第三方服务
+
+| 服务 | 可见内容 | 原因 |
+|------|----------|------|
+| Supabase | 所有已存储数据 | 数据库和认证提供方 |
+| Amazon S3 | 原始上传文件 | 文件存储 |
+| Railway | 经 API 传输的所有数据 | API 和 MCP 服务器托管 |
+| Netlify | 前端资源、请求日志 | Web 应用托管 |
+| Anthropic (Claude) | AI 对话期间的文档内容 | 通过 MCP 提供 Wiki 生成和知识库工具 |
+
+我们不会为了训练 AI 模型而将你的内容发送给任何服务。
+
+## AI 工具如何访问你的内容
+
+LLM Wiki 通过 Model Context Protocol（MCP）连接 AI 助手，例如 Anthropic 的 Claude。当你连接 Claude 账户后：
+
+- Claude 可以使用 MCP 工具搜索、读取和写入你的知识库
+- 你的内容会作为对话的一部分，通过 Anthropic 的基础设施发送给 Claude
+- 该访问受你与 Anthropic 的关系及其隐私政策约束
+- 你可以随时在 Claude 设置中移除 MCP 连接以断开访问
+
+我们无法控制 Anthropic 如何处理通过 Claude 对话发送的内容。请参阅 Anthropic 的隐私政策了解其数据处理方式。
+
+## 我们不会做什么
+
+- 我们不会出售你的数据
+- 我们不会投放广告
+- 我们不会使用你的内容训练 AI 模型
+- 我们不会与其他用户共享你的内容，除非你明确将知识库设为公开
+- 除非法律要求，我们不会出于提供服务以外的目的访问你的内容
+
+## 公开知识库
+
+如果你选择将知识库设为公开，其 Wiki 页面将对互联网上的任何人可见，并可能被搜索引擎索引。公开知识库中的原始资料文档不会公开，只有 Wiki 页面会公开。你可以随时将知识库重新设为私有，这会移除其公开访问。
+
+## 数据保留与删除
+
+只要你保留账户，我们就会存储你的内容。你可以随时删除单个文档、知识库或整个账户。
+
+当你删除内容时：
+- 文档和 Wiki 页面会从数据库中移除
+- 上传文件会从 S3 中移除
+- 搜索索引条目会被移除
+- 删除是永久性的，除标准数据库备份窗口（7 天）外，我们不会保留已删除内容的备份
+
+当你删除账户时：
+- 所有知识库、文档、Wiki 页面和上传文件都会被永久删除
+- 你的认证凭据会从 Supabase 中移除
+- 此过程不可逆
+
+如需请求删除账户，请发送邮件至 lucas@llmwiki.app。
+
+## 你的权利
+
+你可以随时：
+- 导出你的数据，下载你的文档和 Wiki 页面
+- 删除特定内容或整个账户
+- 通过移除 MCP 连接断开 AI 工具访问
+- 将知识库设为私有或公开
+- 请求了解我们持有哪些关于你的数据，请发送邮件至 lucas@llmwiki.app
+
+如果你位于欧盟，你在 GDPR 下享有额外权利，包括数据可携带权、更正权和删除权。请联系 lucas@llmwiki.app 行使这些权利。
+
+## 自托管
+
+LLM Wiki 是开源项目，采用 Apache 2.0 许可证。如果你需要完整的数据主权，可以在自己的基础设施上自托管整个系统。自托管时，数据不会经过我们的系统。部署说明请参阅 GitHub 仓库。
+
+## 儿童
+
+LLM Wiki 不面向 13 岁以下儿童使用。我们不会在知情情况下收集 13 岁以下儿童的个人信息。
+
+## 本政策变更
+
+我们可能会不时更新本政策。若发生重大变更，我们会通过邮件或在应用中发布通知。变更后继续使用本服务即表示你接受更新后的政策。
+
+## 联系
+
+隐私问题或数据请求请联系：lucas@llmwiki.app
+`,
+} as const
+
+export type PrivacyLocale = keyof typeof privacyByLocale

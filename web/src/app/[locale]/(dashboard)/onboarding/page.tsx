@@ -47,9 +47,10 @@ export default function OnboardingPage() {
   React.useEffect(() => {
     if (user) {
       const name = user.email.split('@')[0]
-      setWikiName(`${name.charAt(0).toUpperCase() + name.slice(1)}'s Wiki`)
+      const displayName = name.charAt(0).toUpperCase() + name.slice(1)
+      setWikiName(t('defaultWikiName', { name: displayName }))
     }
-  }, [user])
+  }, [user, t])
 
   const handleCreateWiki = async () => {
     if (!token || !wikiName.trim()) return
@@ -60,7 +61,7 @@ export default function OnboardingPage() {
       setCreatedSlug(kb.slug)
       goToStep('connect')
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to create wiki'
+      const msg = err instanceof Error ? err.message : t('failedCreateWiki')
       setError(msg)
     } finally {
       setCreating(false)

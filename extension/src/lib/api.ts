@@ -135,7 +135,7 @@ export async function fetchKnowledgeBases(
   const res = await fetch(`${apiUrl}/v1/knowledge-bases`, {
     headers: authHeaders(accessToken),
   });
-  if (!res.ok) throw new Error(`Failed to fetch knowledge bases: ${res.status}`);
+  if (!res.ok) throw new Error(`获取知识库失败：${res.status}`);
   return res.json();
 }
 
@@ -149,7 +149,7 @@ export async function createKnowledgeBase(
     headers: jsonHeaders(accessToken),
     body: JSON.stringify({ name }),
   });
-  if (!res.ok) throw new Error(`Failed to create knowledge base: ${res.status}`);
+  if (!res.ok) throw new Error(`创建知识库失败：${res.status}`);
   return res.json();
 }
 
@@ -169,7 +169,7 @@ export async function saveWebPage(
   );
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Save failed (${res.status}): ${text}`);
+    throw new Error(`保存失败（${res.status}）：${text}`);
   }
   return res.json();
 }
@@ -184,7 +184,7 @@ export async function getDocumentByUrl(
     { headers: authHeaders(accessToken) },
   );
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`Lookup failed: ${res.status}`);
+  if (!res.ok) throw new Error(`查询失败：${res.status}`);
   return res.data as DocumentByUrl;
 }
 
@@ -197,7 +197,7 @@ export async function getHighlights(
     `${apiUrl}/v1/documents/${documentId}/highlights`,
     { headers: authHeaders(accessToken) },
   );
-  if (!res.ok) throw new Error(`Fetch highlights failed: ${res.status}`);
+  if (!res.ok) throw new Error(`获取划线失败：${res.status}`);
   return res.data as HighlightsResponse;
 }
 
@@ -217,10 +217,10 @@ export async function replaceHighlights(
     },
   );
   if (res.status === 409) {
-    throw Object.assign(new Error("Version conflict"), { conflict: true });
+    throw Object.assign(new Error("版本冲突"), { conflict: true });
   }
   if (!res.ok) {
-    throw new Error(`Save highlights failed (${res.status}): ${res.text}`);
+    throw new Error(`保存划线失败（${res.status}）：${res.text}`);
   }
   return res.data as HighlightsResponse;
 }
@@ -247,7 +247,7 @@ export async function savePdf(
       method: "POST",
       body: form,
     });
-    if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+    if (!res.ok) throw new Error(`上传失败：${res.status}`);
     const data = await res.json();
     return { id: data.id, status: "pending" };
   }
@@ -270,11 +270,11 @@ export async function savePdf(
   });
   if (!createRes.ok) {
     const text = await createRes.text();
-    throw new Error(`Upload init failed (${createRes.status}): ${text}`);
+    throw new Error(`上传初始化失败（${createRes.status}）：${text}`);
   }
 
   const location = createRes.headers.get("Location");
-  if (!location) throw new Error("No Location header in TUS response");
+  if (!location) throw new Error("TUS 响应缺少 Location 头");
   const uploadUrl = location.startsWith("http")
     ? location
     : `${apiUrl}${location}`;
@@ -290,7 +290,7 @@ export async function savePdf(
     body: pdfBuffer,
   });
   if (!patchRes.ok && patchRes.status !== 204) {
-    throw new Error(`Upload failed: ${patchRes.status}`);
+    throw new Error(`上传失败：${patchRes.status}`);
   }
 
   const documentId = patchRes.headers.get("X-Document-Id") ?? "";

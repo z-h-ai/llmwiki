@@ -35,7 +35,7 @@ export default function KBPicker({ apiUrl, accessToken, value, onChange }: Props
         onChange(list[0].id);
       }
     } catch {
-      setError("Failed to load knowledge bases");
+      setError("知识库加载失败");
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function KBPicker({ apiUrl, accessToken, value, onChange }: Props
       setCreating(false);
       setNewName("");
     } catch {
-      setError("Failed to create knowledge base");
+      setError("知识库创建失败");
     }
   }
 
@@ -61,12 +61,12 @@ export default function KBPicker({ apiUrl, accessToken, value, onChange }: Props
   }
 
   if (loading) {
-    return <div className="text-xs text-gray-400 py-1">Loading knowledge bases...</div>;
+    return <div className="text-xs text-gray-400 py-1">正在加载知识库...</div>;
   }
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-medium text-gray-600">Knowledge Base</label>
+      <label className="block text-xs font-medium text-gray-600">知识库</label>
 
       {!creating ? (
         <div className="flex gap-2">
@@ -78,7 +78,7 @@ export default function KBPicker({ apiUrl, accessToken, value, onChange }: Props
                        focus:ring-1 focus:ring-gray-900 outline-none"
           >
             {kbs.length === 0 && (
-              <option value="" disabled>No knowledge bases — create one</option>
+              <option value="" disabled>暂无知识库，请先创建</option>
             )}
             {kbs.map((kb) => (
               <option key={kb.id} value={kb.id}>{kb.name}</option>
@@ -90,7 +90,7 @@ export default function KBPicker({ apiUrl, accessToken, value, onChange }: Props
                        border border-gray-300 rounded-md hover:bg-gray-50 transition-colors
                        whitespace-nowrap"
           >
-            + New
+            + 新建
           </button>
         </div>
       ) : (
@@ -100,7 +100,7 @@ export default function KBPicker({ apiUrl, accessToken, value, onChange }: Props
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Knowledge base name"
+            placeholder="知识库名称"
             className="flex-1 rounded-md border border-gray-300 px-3 py-1.5
                        text-sm text-gray-900 shadow-sm focus:border-gray-900
                        focus:ring-1 focus:ring-gray-900 outline-none"
@@ -112,13 +112,13 @@ export default function KBPicker({ apiUrl, accessToken, value, onChange }: Props
                        hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed
                        transition-colors"
           >
-            Add
+            添加
           </button>
           <button
             onClick={() => { setCreating(false); setNewName(""); }}
             className="px-2 py-1.5 text-xs text-gray-500 hover:text-gray-700"
           >
-            Cancel
+            取消
           </button>
         </div>
       )}

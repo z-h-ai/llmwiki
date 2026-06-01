@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import type { PropertyType, TypedProperty, PropertyMap } from '@/lib/types'
+import { useTranslations } from 'next-intl'
 
 const ALLOWED_SCHEMES = new Set(['http:', 'https:', 'mailto:'])
 
@@ -68,6 +69,7 @@ function DatePropertyEditor({
   value: string | null
   onChange: (value: string | null) => void
 }) {
+  const t = useTranslations('editor')
   const [open, setOpen] = React.useState(false)
 
   const dateObj = React.useMemo(() => {
@@ -86,7 +88,7 @@ function DatePropertyEditor({
               value ? 'text-foreground' : 'text-muted-foreground/40'
             )}
           >
-            {dateObj ? format(dateObj, 'PPP') : 'Pick a date'}
+            {dateObj ? format(dateObj, 'PPP') : t('pickDate')}
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -124,6 +126,7 @@ function SelectPropertyEditor({
   onChange: (value: string | null) => void
   onOptionsChange: (options: string[]) => void
 }) {
+  const t = useTranslations('editor')
   const [open, setOpen] = React.useState(false)
   const [input, setInput] = React.useState('')
 
@@ -148,7 +151,7 @@ function SelectPropertyEditor({
             value ? 'text-foreground' : 'text-muted-foreground/40'
           )}
         >
-          {value || 'Select...'}
+          {value || t('selectPlaceholder')}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-48 p-1" align="start">
@@ -169,7 +172,7 @@ function SelectPropertyEditor({
               }
             }
           }}
-          placeholder="Search or add..."
+          placeholder={t('searchOrAdd')}
           className="w-full text-sm bg-transparent border-none outline-none px-2 py-1.5 placeholder:text-muted-foreground/40"
           autoFocus
         />
@@ -179,7 +182,7 @@ function SelectPropertyEditor({
               onClick={() => { onChange(null); setOpen(false); setInput('') }}
               className="w-full text-left text-sm px-2 py-1.5 rounded-sm hover:bg-accent text-muted-foreground/60 cursor-pointer"
             >
-              Clear
+              {t('clear')}
             </button>
           )}
           {filtered.map((opt) => (
@@ -201,7 +204,7 @@ function SelectPropertyEditor({
               className="w-full text-left text-sm px-2 py-1.5 rounded-sm hover:bg-accent text-muted-foreground cursor-pointer"
             >
               <Plus className="size-3 inline mr-1.5" />
-              Create &ldquo;{input.trim()}&rdquo;
+              {t('createOption', { value: input.trim() })}
             </button>
           )}
         </div>
@@ -219,6 +222,7 @@ export function PropertyValueEditor({
   onChange: (value: TypedProperty['value']) => void
   onOptionsChange?: (options: string[]) => void
 }) {
+  const t = useTranslations('editor')
   switch (property.type) {
     case 'text':
       return (
@@ -226,7 +230,7 @@ export function PropertyValueEditor({
           type="text"
           value={(property.value as string) ?? ''}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Empty"
+          placeholder={t('empty')}
           className="text-sm text-foreground bg-transparent border-none outline-none flex-1 h-7 px-1.5 placeholder:text-muted-foreground/30"
         />
       )
@@ -236,7 +240,7 @@ export function PropertyValueEditor({
           type="number"
           value={property.value != null ? String(property.value) : ''}
           onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
-          placeholder="Empty"
+          placeholder={t('empty')}
           className="text-sm text-foreground bg-transparent border-none outline-none flex-1 h-7 px-1.5 placeholder:text-muted-foreground/30 [&::-webkit-inner-spin-button]:appearance-none"
         />
       )
@@ -303,13 +307,14 @@ export function TagsRow({
   onAddTag: () => void
   onRemoveTag: (tag: string) => void
 }) {
+  const t = useTranslations('editor')
   const [expanded, setExpanded] = React.useState(false)
 
   return (
     <div className="flex items-start min-h-8">
       <div className="flex items-center gap-2 w-24 shrink-0 h-8">
         <Tag className="size-3.5 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">tags</span>
+        <span className="text-sm text-muted-foreground">{t('tags')}</span>
       </div>
       <div className="flex-1 min-w-0 relative">
         <div
@@ -338,7 +343,7 @@ export function TagsRow({
             onChange={(e) => onTagInputChange(e.target.value)}
             onKeyDown={onTagKeyDown}
             onBlur={onAddTag}
-            placeholder={tags.length === 0 ? 'Add tags...' : '+'}
+            placeholder={tags.length === 0 ? t('addTags') : '+'}
             className="text-sm bg-transparent border-none outline-none text-muted-foreground placeholder:text-muted-foreground/30 w-16 shrink-0"
           />
         </div>
@@ -398,29 +403,30 @@ export function PropertyRow({
 }
 
 export function AddPropertyButton({ onAdd }: { onAdd: (type: PropertyType) => void }) {
+  const t = useTranslations('editor')
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-2 h-7 text-sm text-muted-foreground/40 hover:text-muted-foreground transition-colors cursor-pointer">
           <Plus className="size-3.5" />
-          <span>Add property</span>
+          <span>{t('addProperty')}</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem onClick={() => onAdd('text')}>
-          <Type className="size-4" />Text
+          <Type className="size-4" />{t('propertyText')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAdd('number')}>
-          <Hash className="size-4" />Number
+          <Hash className="size-4" />{t('propertyNumber')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAdd('date')}>
-          <CalendarIcon className="size-4" />Date
+          <CalendarIcon className="size-4" />{t('propertyDate')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAdd('checkbox')}>
-          <CheckSquare className="size-4" />Checkbox
+          <CheckSquare className="size-4" />{t('propertyCheckbox')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAdd('select')}>
-          <List className="size-4" />Select
+          <List className="size-4" />{t('propertySelect')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAdd('url')}>
           <LinkIcon className="size-4" />URL

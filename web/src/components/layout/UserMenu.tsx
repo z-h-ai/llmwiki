@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { useTheme } from 'next-themes'
 import { useUserStore } from '@/stores'
 import { Settings, LogOut, Moon, Sun } from 'lucide-react'
@@ -9,9 +9,11 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTranslations } from 'next-intl'
 const isLocal = process.env.NEXT_PUBLIC_MODE === 'local'
 
 export function UserMenu() {
+  const t = useTranslations('common')
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const user = useUserStore((s) => s.user)
@@ -49,21 +51,21 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => router.push('/settings')}>
           <Settings className="mr-2 h-4 w-4" />
-          Settings
+          {t('settings')}
         </DropdownMenuItem>
         {mounted && (
           <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? (
-              <><Sun className="mr-2 h-4 w-4" />Light Mode</>
+              <><Sun className="mr-2 h-4 w-4" />{t('lightMode')}</>
             ) : (
-              <><Moon className="mr-2 h-4 w-4" />Dark Mode</>
+              <><Moon className="mr-2 h-4 w-4" />{t('darkMode')}</>
             )}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+          {t('signOut')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -7,14 +7,14 @@ import { MotionDiv, MotionP } from './LandingMotion'
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
 const WIKI_TREE = [
-  { label: 'Overview', active: true, depth: 0 },
-  { label: 'Concepts', depth: 0, folder: true },
-  { label: 'Attention Mechanisms', depth: 1 },
-  { label: 'Scaling Laws', depth: 1 },
-  { label: 'Entities', depth: 0, folder: true },
-  { label: 'Transformer Architecture', depth: 1 },
-  { label: 'Sources', depth: 0, folder: true },
-  { label: 'Log', depth: 0 },
+  { labelKey: 'overview', active: true, depth: 0 },
+  { labelKey: 'treeConcepts', depth: 0, folder: true },
+  { labelKey: 'treeAttention', depth: 1 },
+  { labelKey: 'treeScaling', depth: 1 },
+  { labelKey: 'treeEntities', depth: 0, folder: true },
+  { labelKey: 'treeTransformer', depth: 1 },
+  { labelKey: 'treeSources', depth: 0, folder: true },
+  { labelKey: 'treeLog', depth: 0 },
 ]
 
 const jsonLd = {
@@ -177,7 +177,7 @@ export default async function LandingPage() {
                       ) : (
                         <FileText className="size-3 opacity-40" />
                       )}
-                      {item.label}
+                      {t(item.labelKey)}
                     </div>
                   ))}
                 </div>

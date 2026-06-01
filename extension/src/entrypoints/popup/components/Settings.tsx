@@ -39,11 +39,11 @@ export default function Settings({ onBack, onModeChange }: Props) {
         onClick={onBack}
         className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
       >
-        &larr; Back
+        &larr; 返回
       </button>
 
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-2">Mode</label>
+        <label className="block text-xs font-medium text-gray-600 mb-2">模式</label>
         <div className="flex gap-2">
           <button
             onClick={() => handleModeChange("cloud")}
@@ -53,7 +53,7 @@ export default function Settings({ onBack, onModeChange }: Props) {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            Cloud
+            云端
           </button>
           <button
             onClick={() => handleModeChange("local")}
@@ -63,13 +63,13 @@ export default function Settings({ onBack, onModeChange }: Props) {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            Local
+            本地
           </button>
         </div>
         <p className="text-[11px] text-gray-400 mt-1.5">
           {mode === "cloud"
-            ? "Saves to llmwiki.app — requires sign in"
-            : "Saves to your local LLM Wiki instance — no sign in needed"}
+            ? "保存到 llmwiki.app，需要登录"
+            : "保存到你的本地 LLM Wiki 实例，无需登录"}
         </p>
       </div>
 
@@ -93,14 +93,14 @@ export default function Settings({ onBack, onModeChange }: Props) {
               className="px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-md
                          hover:bg-gray-800 transition-colors"
             >
-              Save
+              保存
             </button>
           </div>
         </div>
       )}
 
       {saved && (
-        <p className="text-xs text-green-600">Settings saved</p>
+        <p className="text-xs text-green-600">设置已保存</p>
       )}
     </div>
   );

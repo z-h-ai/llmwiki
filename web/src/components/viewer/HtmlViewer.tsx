@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   fileUrl: string
@@ -27,6 +28,7 @@ ${selectors} {
 }
 
 export default function HtmlViewer({ fileUrl, sourceUrl, highlightIds = [], className }: Props) {
+  const t = useTranslations('viewer')
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -78,7 +80,7 @@ export default function HtmlViewer({ fileUrl, sourceUrl, highlightIds = [], clas
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3">
-        <p className="text-sm text-muted-foreground">Failed to load document</p>
+        <p className="text-sm text-muted-foreground">{t('failedLoadDocument')}</p>
         {sourceUrl && (
           <a
             href={sourceUrl}
@@ -87,7 +89,7 @@ export default function HtmlViewer({ fileUrl, sourceUrl, highlightIds = [], clas
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <ExternalLink className="size-3.5" />
-            Open original page
+            {t('openOriginalPage')}
           </a>
         )}
       </div>
@@ -100,7 +102,7 @@ export default function HtmlViewer({ fileUrl, sourceUrl, highlightIds = [], clas
       srcDoc={srcdoc ?? ''}
       sandbox="allow-same-origin"
       className={cn('w-full h-full border-0 bg-white', className)}
-      title="Document viewer"
+      title={t('documentViewer')}
       onLoad={handleIframeLoad}
     />
   )

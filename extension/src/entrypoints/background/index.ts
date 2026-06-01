@@ -85,7 +85,7 @@ export default defineBackground(() => {
       }
       return { ok: res.ok, status: res.status, data };
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Network error";
+      const message = err instanceof Error ? err.message : "网络错误";
       return { ok: false, status: 0, error: message };
     }
   }
@@ -138,7 +138,7 @@ export default defineBackground(() => {
         return { success: false, error: error.message };
       }
       if (!data?.url) {
-        return { success: false, error: "Supabase returned no OAuth URL" };
+        return { success: false, error: "Supabase 未返回 OAuth 地址" };
       }
 
       // Step 2-3: open Google's auth via Supabase's URL. Supabase handles the
@@ -149,7 +149,7 @@ export default defineBackground(() => {
         interactive: true,
       });
       if (!callbackUrl) {
-        return { success: false, error: "Auth flow cancelled" };
+        return { success: false, error: "登录流程已取消" };
       }
 
       const parsed = new URL(callbackUrl);
@@ -160,7 +160,7 @@ export default defineBackground(() => {
       }
       const code = parsed.searchParams.get("code");
       if (!code) {
-        return { success: false, error: "No auth code in callback URL" };
+        return { success: false, error: "回调地址中没有授权码" };
       }
 
       // Step 4: trade Supabase's code for an actual session.
@@ -170,7 +170,7 @@ export default defineBackground(() => {
       }
       return { success: true };
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Auth failed";
+      const message = err instanceof Error ? err.message : "登录失败";
       return { success: false, error: message };
     }
   }
@@ -224,7 +224,7 @@ export default defineBackground(() => {
       return { blob: bytes, filename };
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "PDF download failed";
+        err instanceof Error ? err.message : "PDF 下载失败";
       return { error: message };
     }
   }

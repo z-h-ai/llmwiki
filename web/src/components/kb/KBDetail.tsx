@@ -16,6 +16,7 @@ import { SelectionActionBar } from '@/components/kb/SelectionActionBar'
 import { WikiContent } from '@/components/wiki/WikiContent'
 import type { DocumentListItem, WikiNode } from '@/lib/types'
 import type { ViewMode } from '@/app/[locale]/(dashboard)/wikis/[slug]/[[...path]]/page'
+import { useTranslations } from 'next-intl'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -113,6 +114,7 @@ type Props = {
 }
 
 export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Props) {
+  const tkb = useTranslations('kb')
   const searchParams = useSearchParams()
   const token = useUserStore((s) => s.accessToken)
   const userId = useUserStore((s) => s.user?.id)
@@ -283,7 +285,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
       return
     }
     if (!activeWikiDoc) {
-      setPageContent(`Page not found: ${wikiActivePath}`)
+      setPageContent(tkb('pageNotFound', { path: wikiActivePath }))
       setPageTitle('')
       setPageLoadedPath(wikiActivePath)
       return
@@ -300,7 +302,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
         if (!controller.signal.aborted) setPageContent(res.content || '')
       })
       .catch((err) => {
-        if (!controller.signal.aborted) setPageContent('Failed to load page content.')
+        if (!controller.signal.aborted) setPageContent(tkb('failedLoadPage'))
       })
       .finally(() => {
         if (!controller.signal.aborted) {
@@ -309,12 +311,12 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
         }
       })
     return () => controller.abort()
-  }, [wikiActivePath, token, activeWikiDocId, activeWikiVersion])
+  }, [wikiActivePath, token, activeWikiDocId, activeWikiVersion, activeWikiDoc, pageLoadedPath, tkb])
 
   // ─── Token helper ────────────────────────────────────────────
   const getToken = () => {
     const t = useUserStore.getState().accessToken
-    if (!t) { toast.error('Not authenticated'); return null }
+    if (!t) { toast.error(tkb('notAuthenticated')); return null }
     return t
   }
 
@@ -363,12 +365,12 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
     const t = getToken()
     if (!t) return
     const ids = Array.from(selectedIds)
-    if (!window.confirm(`Delete ${ids.length} selected document${ids.length > 1 ? 's' : ''}?`)) return
+    if (!window.confirm(tkb('deleteSelectedConfirm', { count: ids.length }))) return
     const results = await Promise.allSettled(ids.map((id) => apiFetch(`/v1/documents/${id}`, t, { method: 'DELETE' })))
     const succeeded = ids.filter((_, i) => results[i].status === 'fulfilled')
     const failed = ids.filter((_, i) => results[i].status === 'rejected')
     if (succeeded.length > 0) setDocuments((prev) => prev.filter((d) => !succeeded.includes(d.id)))
-    if (failed.length > 0) toast.error(`Failed to delete ${failed.length} document${failed.length > 1 ? 's' : ''}`)
+    if (failed.length > 0) toast.error(tkb('failedDeleteCount', { count: failed.length }))
     clearSelection()
   }
 
@@ -525,7 +527,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
         navigateToView('files')
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to create note')
+      toast.error(err instanceof Error ? err.message : tkb('failedCreateNote'))
     }
   }
 
@@ -544,7 +546,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
           navigateToView('files')
         }
       })
-      .catch((err: Error) => toast.error(err.message || 'Failed to create folder'))
+      .catch((err: Error) => toast.error(err.message || tkb('failedCreateFolder')))
   }
 
   const handleMoveDocument = async (docId: string, targetPath: string) => {
@@ -553,7 +555,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
     try {
       await apiFetch(`/v1/documents/${docId}`, t, { method: 'PATCH', body: JSON.stringify({ path: targetPath }) })
       setDocuments((prev) => prev.map((d) => d.id === docId ? { ...d, path: targetPath } : d))
-    } catch { toast.error('Failed to move document') }
+    } catch { toast.error(tkb('failedMoveDocument')) }
   }
 
   const handleDeleteDocument = async (docId: string) => {
@@ -562,7 +564,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
     try {
       await apiFetch(`/v1/documents/${docId}`, t, { method: 'DELETE' })
       setDocuments((prev) => prev.filter((d) => d.id !== docId))
-    } catch { toast.error('Failed to delete document') }
+    } catch { toast.error(tkb('failedDeleteDocument')) }
   }
 
   const handleRenameDocument = async (docId: string, newTitle: string) => {
@@ -571,7 +573,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
     try {
       await apiFetch(`/v1/documents/${docId}`, t, { method: 'PATCH', body: JSON.stringify({ title: newTitle }) })
       setDocuments((prev) => prev.map((d) => d.id === docId ? { ...d, title: newTitle } : d))
-    } catch { toast.error('Failed to rename document') }
+    } catch { toast.error(tkb('failedRenameDocument')) }
   }
 
   // ─── File upload ─────────────────────────────────────────────
@@ -588,19 +590,19 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
 
   const tusUploadFile = React.useCallback((file: File, targetPath: string = '/'): Promise<void> => {
     const t = getToken()
-    if (!t) return Promise.reject(new Error('Not authenticated'))
+    if (!t) return Promise.reject(new Error(tkb('notAuthenticated')))
     return new Promise((resolve, reject) => {
       const upload = new tus.Upload(file, {
         endpoint: `${API_URL}/v1/uploads`,
         retryDelays: [0, 1000, 3000, 5000],
         metadata: { filename: file.name, knowledge_base_id: kbId, path: targetPath },
         headers: { Authorization: `Bearer ${t}` },
-        onError: (error) => { toast.error(`Upload failed: ${file.name}`); reject(error) },
-        onSuccess: () => { toast.success(`${file.name} uploaded, processing...`); resolve() },
+        onError: (error) => { toast.error(tkb('uploadFailed', { name: file.name })); reject(error) },
+        onSuccess: () => { toast.success(tkb('uploadedProcessing', { name: file.name })); resolve() },
       })
       upload.start()
     })
-  }, [kbId])
+  }, [kbId, tkb])
 
   const uploadFiles = React.useCallback((files: File[], targetPath: string = '/') => {
     const t = getToken()
@@ -615,7 +617,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
     const duplicates = files.filter((f) => existingNames.has(f.name.toLowerCase()))
     if (duplicates.length > 0) {
       const names = duplicates.map((f) => f.name).join(', ')
-      toast.error(`Already exists: ${names}`)
+      toast.error(tkb('alreadyExists', { names }))
       if (duplicates.length === files.length) return
       files = files.filter((f) => !existingNames.has(f.name.toLowerCase()))
     }
@@ -631,7 +633,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
             body: JSON.stringify({ filename: file.name, title, content, path: targetPath }),
           })
           setDocuments((prev) => [data, ...prev])
-        } catch { toast.error(`Failed to import ${file.name}`) }
+        } catch { toast.error(tkb('failedImport', { name: file.name })) }
       } else {
         const supportedTypes = new Set(['pdf', 'pptx', 'ppt', 'docx', 'doc', 'png', 'jpg', 'jpeg', 'webp', 'gif', 'xlsx', 'xls', 'csv', 'html', 'htm'])
         if (ext && supportedTypes.has(ext)) {
@@ -644,26 +646,26 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
               if (!res.ok) throw new Error(`Upload failed: ${res.status}`)
               const data = await res.json()
               setDocuments((prev) => [data, ...prev])
-              toast.success(`${file.name} uploaded`)
-            } catch { toast.error(`Upload failed: ${file.name}`) }
+              toast.success(tkb('uploaded', { name: file.name }))
+            } catch { toast.error(tkb('uploadFailed', { name: file.name })) }
           } else {
             await tusUploadFile(file, targetPath)
           }
         } else {
-          toast.info(`${ext} files not yet supported`)
+          toast.info(tkb('unsupportedFileType', { type: ext || '' }))
         }
       }
     })
     Promise.all(uploads).then(() => {
       const textFiles = files.filter((f) => /\.(md|txt)$/i.test(f.name))
-      if (textFiles.length > 0) toast.success(`Imported ${textFiles.length} file${textFiles.length > 1 ? 's' : ''}`)
+      if (textFiles.length > 0) toast.success(tkb('importedFiles', { count: textFiles.length }))
       // Navigate to files view after first upload
       if (sourceDocs.length === 0) {
         setActiveView('files')
         navigateToView('files')
       }
     })
-  }, [kbId, userId, tusUploadFile, documents, sourceDocs.length, navigateToView])
+  }, [kbId, userId, tusUploadFile, documents, sourceDocs.length, navigateToView, tkb])
 
   // ─── Drag-and-drop ───────────────────────────────────────────
   const [fileDragOver, setFileDragOver] = React.useState(false)
@@ -750,8 +752,8 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
           >
             <div className="flex flex-col items-center gap-3 border-2 border-dashed border-primary rounded-xl px-12 py-10">
               <UploadIcon className="size-8 text-primary" />
-              <p className="text-sm font-medium text-primary">Drop files to upload</p>
-              <p className="text-xs text-muted-foreground">PDF, Word, PowerPoint, images, and more</p>
+              <p className="text-sm font-medium text-primary">{tkb('dropToUpload')}</p>
+              <p className="text-xs text-muted-foreground">{tkb('dropFilesHelp')}</p>
             </div>
           </motion.div>
         )}
@@ -871,9 +873,9 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
               >
                 <BookOpen className="size-10 text-muted-foreground/20" />
                 <div className="text-center max-w-sm">
-                  <h3 className="text-base font-medium mb-1.5">No wiki yet</h3>
+                  <h3 className="text-base font-medium mb-1.5">{tkb('noWikiYet')}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Add some sources, then ask Claude to compile a wiki from them.
+                    {tkb('noWikiYetDesc')}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 mt-2">
@@ -882,7 +884,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
                     className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2 text-sm font-medium hover:opacity-90 transition-opacity cursor-pointer"
                   >
                     <UploadIcon className="size-3.5 opacity-60" />
-                    Upload Sources
+                    {tkb('uploadSources')}
                   </button>
                   <a
                     href="https://claude.ai"
@@ -890,7 +892,7 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium hover:bg-accent transition-colors"
                   >
-                    Open Claude
+                    {tkb('openClaude')}
                     <ArrowUpRight className="size-3.5 opacity-60" />
                   </a>
                 </div>

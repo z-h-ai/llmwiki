@@ -73,7 +73,7 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
         await handleSaveWeb();
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Save failed";
+      const message = err instanceof Error ? err.message : "保存失败";
       setStatus({ type: "error", message });
     }
   }
@@ -81,7 +81,7 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
   async function handleSaveWeb() {
     if (!tab || !knowledgeBaseId) return;
 
-    setStatus({ type: "saving", message: "Extracting page..." });
+    setStatus({ type: "saving", message: "正在提取页面..." });
 
     let html: string;
     try {
@@ -106,7 +106,7 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
       });
       html = result as string;
     } catch {
-      throw new Error("Could not extract page content. Try refreshing the page.");
+      throw new Error("无法提取页面内容。请刷新页面后重试。");
     }
 
     let highlights: Highlight[] = [];
@@ -121,7 +121,7 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
       // Content script may not be present (e.g. PDF, restricted page). Ignore.
     }
 
-    setStatus({ type: "saving", message: "Saving to LLM Wiki..." });
+    setStatus({ type: "saving", message: "正在保存到 LLM Wiki..." });
 
     const canonicalUrl = canonicalize(tab.url);
 
@@ -149,7 +149,7 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
   async function handleSavePdf() {
     if (!tab || !knowledgeBaseId) return;
 
-    setStatus({ type: "saving", message: "Downloading PDF..." });
+    setStatus({ type: "saving", message: "正在下载 PDF..." });
 
     const downloadResult = await chrome.runtime.sendMessage({
       type: "DOWNLOAD_PDF",
@@ -160,7 +160,7 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
       throw new Error(downloadResult.error);
     }
 
-    setStatus({ type: "saving", message: "Uploading to LLM Wiki..." });
+    setStatus({ type: "saving", message: "正在上传到 LLM Wiki..." });
 
     const pdfBytes = new Uint8Array(downloadResult.blob);
     await savePdf(apiUrl, accessToken, pdfBytes, downloadResult.filename, knowledgeBaseId);
@@ -188,21 +188,21 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
             tab.isPdf ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-700"
           }`}
         >
-          {tab.isPdf ? "PDF" : "Web"}
+          {tab.isPdf ? "PDF" : "网页"}
         </span>
         <span className="text-xs text-gray-400 truncate max-w-[320px]">{tab.url}</span>
       </div>
 
       {/* Title */}
       <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">Title</label>
+        <label className="block text-xs font-medium text-gray-600 mb-1">标题</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm
                      text-gray-900 shadow-sm focus:border-gray-900 focus:ring-1
                      focus:ring-gray-900 outline-none"
-          placeholder="Page title"
+          placeholder="页面标题"
         />
       </div>
 
@@ -222,7 +222,7 @@ export default function SaveForm({ apiUrl, accessToken }: Props) {
                    bg-gray-900 hover:bg-gray-800 disabled:opacity-50
                    disabled:cursor-not-allowed transition-colors shadow-sm"
       >
-        {isSaving ? "Saving..." : "Save to LLM Wiki"}
+        {isSaving ? "保存中..." : "保存到 LLM Wiki"}
       </button>
 
       <StatusFeedback status={status} />

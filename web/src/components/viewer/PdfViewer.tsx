@@ -6,6 +6,7 @@ import { Document, Page } from 'react-pdf'
 import { ChevronUp, ChevronDown, Search, X, Download, ZoomIn, ZoomOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ensurePdfWorker } from '@/lib/pdfjs'
+import { useTranslations } from 'next-intl'
 
 import 'react-pdf/dist/Page/TextLayer.css'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
@@ -23,6 +24,7 @@ type Props = {
 const VIRTUALIZE_BUFFER = 2
 
 export default function PdfViewer({ fileUrl, title, className, initialPage, hideToolbar }: Props) {
+  const t = useTranslations('viewer')
   const [numPages, setNumPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -469,8 +471,8 @@ export default function PdfViewer({ fileUrl, title, className, initialPage, hide
                     if (e.key === 'Enter') { e.preventDefault(); navigateMatch(e.shiftKey ? -1 : 1) }
                     if (e.key === 'Escape') closeSearch()
                   }}
-                  placeholder="Find in document..."
-                  aria-label="Find in document"
+                  placeholder={t('findInDocument')}
+                  aria-label={t('findInDocument')}
                   className="flex-1 min-w-0 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/50"
                 />
               </div>
@@ -478,18 +480,18 @@ export default function PdfViewer({ fileUrl, title, className, initialPage, hide
                 <span className="tabular-nums text-[10px] flex-shrink-0">{currentMatchIndex + 1}/{matchCount}</span>
               )}
               {searchQuery && matchCount === 0 && !isIndexing && (
-                <span className="text-[10px] flex-shrink-0 opacity-50">No results</span>
+                <span className="text-[10px] flex-shrink-0 opacity-50">{t('noResults')}</span>
               )}
               {isIndexing && searchQuery && (
-                <span className="text-[10px] flex-shrink-0 opacity-50">Indexing...</span>
+                <span className="text-[10px] flex-shrink-0 opacity-50">{t('indexing')}</span>
               )}
-              <button onClick={() => navigateMatch(-1)} disabled={matchCount === 0} aria-label="Previous match" className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer">
+              <button onClick={() => navigateMatch(-1)} disabled={matchCount === 0} aria-label={t('previousMatch')} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer">
                 <ChevronUp className="size-3.5" />
               </button>
-              <button onClick={() => navigateMatch(1)} disabled={matchCount === 0} aria-label="Next match" className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer">
+              <button onClick={() => navigateMatch(1)} disabled={matchCount === 0} aria-label={t('nextMatch')} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer">
                 <ChevronDown className="size-3.5" />
               </button>
-              <button onClick={closeSearch} aria-label="Close search" className="p-1.5 rounded-md hover:text-foreground hover:bg-accent cursor-pointer">
+              <button onClick={closeSearch} aria-label={t('closeSearch')} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent cursor-pointer">
                 <X className="size-3.5" />
               </button>
             </>
@@ -497,10 +499,10 @@ export default function PdfViewer({ fileUrl, title, className, initialPage, hide
             <>
               {title && <span className="min-w-0 truncate text-foreground mr-auto">{title}</span>}
               {!title && <div className="flex-1" />}
-              <button onClick={openSearch} aria-label="Find in document" className="p-1.5 rounded-md hover:text-foreground hover:bg-accent cursor-pointer" title="Find (Cmd+F)">
+              <button onClick={openSearch} aria-label={t('findInDocument')} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent cursor-pointer" title={t('findShortcut')}>
                 <Search className="size-3.5" />
               </button>
-              <a href={fileUrl} download className="p-1.5 rounded-md hover:text-foreground hover:bg-accent" title="Download PDF">
+              <a href={fileUrl} download className="p-1.5 rounded-md hover:text-foreground hover:bg-accent" title={t('downloadPdf')}>
                 <Download className="size-3.5" />
               </a>
               <div className="w-px h-4 bg-border mx-1" />
@@ -520,7 +522,7 @@ export default function PdfViewer({ fileUrl, title, className, initialPage, hide
                     className="w-8 text-center bg-muted/50 rounded px-1 py-0.5 outline-none text-foreground tabular-nums"
                   />
                 ) : (
-                  <button onClick={activatePageInput} className="tabular-nums hover:text-foreground cursor-text" title="Go to page">
+                  <button onClick={activatePageInput} className="tabular-nums hover:text-foreground cursor-text" title={t('goToPage')}>
                     {currentPage}
                   </button>
                 )}
@@ -531,13 +533,13 @@ export default function PdfViewer({ fileUrl, title, className, initialPage, hide
               </div>
               <div className="w-px h-4 bg-border mx-1" />
               <div className="flex items-center gap-0.5">
-                <button onClick={zoomOut} disabled={displayScale <= 0.25} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer" title="Zoom out">
+                <button onClick={zoomOut} disabled={displayScale <= 0.25} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer" title={t('zoomOut')}>
                   <ZoomOut className="size-3.5" />
                 </button>
-                <button onClick={zoomReset} className="tabular-nums hover:text-foreground min-w-[3ch] text-center cursor-pointer" title="Reset zoom">
+                <button onClick={zoomReset} className="tabular-nums hover:text-foreground min-w-[3ch] text-center cursor-pointer" title={t('resetZoom')}>
                   {Math.round(displayScale * 100)}%
                 </button>
-                <button onClick={zoomIn} disabled={displayScale >= 3} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer" title="Zoom in">
+                <button onClick={zoomIn} disabled={displayScale >= 3} className="p-1.5 rounded-md hover:text-foreground hover:bg-accent disabled:opacity-30 cursor-pointer" title={t('zoomIn')}>
                   <ZoomIn className="size-3.5" />
                 </button>
               </div>
@@ -558,7 +560,7 @@ export default function PdfViewer({ fileUrl, title, className, initialPage, hide
             }
             error={
               <div className="text-center py-16 text-sm text-destructive">
-                <p>Failed to load PDF</p>
+                <p>{t('failedLoadPdf')}</p>
               </div>
             }
           >
