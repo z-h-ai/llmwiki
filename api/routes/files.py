@@ -114,12 +114,15 @@ async def open_file_externally(body: OpenFileRequest):
     elif system == "Linux":
         cmd = ["xdg-open", str(resolved)]
     elif system == "Windows":
-        cmd = ["start", "", str(resolved)]
+        cmd = None
     else:
         raise HTTPException(status_code=501, detail=f"Unsupported platform: {system}")
 
     try:
-        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if system == "Windows":
+            os.startfile(str(resolved))  # type: ignore[attr-defined]
+        else:
+            subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except OSError as e:
         raise HTTPException(status_code=500, detail=f"Failed to open file: {e}")
 

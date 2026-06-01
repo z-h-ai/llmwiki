@@ -1,5 +1,6 @@
 import json
 import re
+import tempfile
 import time
 import asyncio
 import logging
@@ -70,7 +71,7 @@ def _validate_file_signature(temp_path: Path, ext: str) -> None:
 
 TUS_VERSION = "1.0.0"
 MAX_SIZE = 104_857_600  # 100 MB
-UPLOAD_DIR = Path("/tmp/supavault_tus_uploads")
+UPLOAD_DIR = Path(tempfile.gettempdir()) / "supavault_tus_uploads"
 STALE_SECONDS = 3600
 
 ALLOWED_EXTENSIONS = {
