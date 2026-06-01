@@ -5,6 +5,8 @@ import { AuthRedirect } from './AuthRedirect'
 import { MotionDiv, MotionP } from './LandingMotion'
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1]
+const isLocal = process.env.NEXT_PUBLIC_MODE === 'local'
+const ctaHref = isLocal ? '/wikis' : '/signup'
 
 const WIKI_TREE = [
   { labelKey: 'overview', active: true, depth: 0 },
@@ -65,7 +67,7 @@ export default async function LandingPage() {
             {tc('signIn')}
           </Link>
           <Link
-            href="/signup"
+            href={ctaHref}
             className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-foreground text-background px-4 py-1.5 text-sm font-medium hover:opacity-90 transition-opacity"
           >
             {tc('getStarted')}
@@ -114,7 +116,7 @@ export default async function LandingPage() {
             className="mt-9 flex items-center justify-center gap-3"
           >
             <Link
-              href="/signup"
+              href={ctaHref}
               className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-6 py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
             >
               {tc('getStarted')}
@@ -356,7 +358,7 @@ export default async function LandingPage() {
             {t('ctaSubtitle')}
           </p>
           <Link
-            href="/signup"
+            href={ctaHref}
             className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-7 py-3 text-sm font-medium hover:opacity-90 transition-opacity"
           >
             {t('getStartedFree')}
