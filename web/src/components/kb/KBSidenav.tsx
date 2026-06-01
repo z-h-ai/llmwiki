@@ -307,6 +307,16 @@ function SidenavSkeleton({ lines }: { lines: number }) {
   )
 }
 
+const TREE_TITLE_KEYS: Record<string, string> = {
+  concepts: 'treeConcepts',
+  attention: 'treeAttention',
+  scaling: 'treeScaling',
+  entities: 'treeEntities',
+  transformer: 'treeTransformer',
+  sources: 'treeSources',
+  log: 'treeLog',
+}
+
 function wikiNodeIcon(node: WikiNode, depth: number) {
   const slug = node.path?.replace(/\.(md|txt|json)$/, '').split('/')[0] ?? ''
   const titleLower = node.title.toLowerCase()
@@ -337,7 +347,16 @@ function WikiTreeNode({
   activePath: string | null
   onNavigate: (path: string, docNumber?: number | null) => void
 }) {
+  const t = useTranslations('kb')
   const hasChildren = node.children && node.children.length > 0
+
+  const displayTitle = React.useMemo(() => {
+    const filename = node.path?.replace(/\.(md|txt|json)$/, '').split('/').pop()?.toLowerCase()
+    if (filename && TREE_TITLE_KEYS[filename]) return t(TREE_TITLE_KEYS[filename])
+    const titleLower = node.title.toLowerCase()
+    if (TREE_TITLE_KEYS[titleLower]) return t(TREE_TITLE_KEYS[titleLower])
+    return node.title
+  }, [node.path, node.title, t])
   const isActive = node.path != null && node.path === activePath
   const hasActiveChild = hasChildren && node.children!.some((c) => c.path === activePath)
   const [expanded, setExpanded] = React.useState(true)
@@ -377,7 +396,7 @@ function WikiTreeNode({
           <span className="w-3.5" />
         )}
         {wikiNodeIcon(node, depth)}
-        <span className="truncate flex-1 min-w-0">{node.title}</span>
+        <span className="truncate flex-1 min-w-0">{displayTitle}</span>
       </div>
       <AnimatePresence initial={false}>
         {hasChildren && (expanded || hasActiveChild) && (
