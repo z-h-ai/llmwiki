@@ -52,8 +52,24 @@ async def create_pool(db_path: str) -> aiosqlite.Connection:
     await db.execute("PRAGMA foreign_keys=ON")
     schema = _SCHEMA_PATH.read_text()
     await db.executescript(schema)
+    # Migrate: add columns that may be missing from older schemas
+    await _migrate(db)
     await db.commit()
     return db
+
+
+async def _migrate(db: aiosqlite.Connection) -> None:
+    """Add missing columns to existing tables (idempotent)."""
+    cursor = await db.execute("PRAGMA table_info(documents)")
+    existing = {row[1] for row in await cursor.fetchall()}
+    migrations = [
+        ("archived", "ALTER TABLE documents ADD COLUMN archived INTEGER DEFAULT 0"),
+        ("sort_order", "ALTER TABLE documents ADD COLUMN sort_order INTEGER DEFAULT 0"),
+        ("url", "ALTER TABLE documents ADD COLUMN url TEXT"),
+    ]
+    for col, sql in migrations:
+        if col not in existing:
+            await db.execute(sql)
 
 
 class SQLiteDocumentRepository:
@@ -102,9 +118,9 @@ class SQLiteDocumentRepository:
         self, kb_id: str, user_id: str, filename: str, path: str,
     ) -> dict | None:
         cursor = await self._db.execute(
-            "SELECT * FROM documents WHERE knowledge_base_id = ? AND user_id = ? "
+            "SELECT * FROM documents WHERE user_id = ? "
             "AND filename = ? AND path = ? AND NOT archived",
-            (kb_id, user_id, filename, path),
+            (user_id, filename, path),
         )
         row = await cursor.fetchone()
         return _row_to_dict(cursor, row) if row else None
@@ -198,7 +214,8 @@ class SQLiteDocumentRepository:
 
     async def get_by_source_url(self, url: str) -> dict | None:
         cursor = await self._db.execute(
-            "SELECT id, knowledge_base_id, title, path, filename, version, highlights "
+            "SELECT id, (SELECT id FROM workspace LIMIT 1) as knowledge_base_id, "
+            "title, path, filename, version, highlights "
             "FROM documents "
             "WHERE status != 'failed' "
             "AND json_extract(metadata, '$.source_url') = ? "

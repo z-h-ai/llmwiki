@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS documents (
     mtime_ns INTEGER,
     last_indexed_at TEXT,
     stale_since TEXT,
+    archived INTEGER DEFAULT 0,
     highlights TEXT DEFAULT '[]',
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now')),

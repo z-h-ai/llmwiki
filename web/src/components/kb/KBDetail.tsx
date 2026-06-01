@@ -19,6 +19,7 @@ import type { ViewMode } from '@/app/[locale]/(dashboard)/wikis/[slug]/[[...path
 import { useTranslations } from 'next-intl'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const isLocal = process.env.NEXT_PUBLIC_MODE === 'local'
 
 
 function buildTreeFromDocs(docs: DocumentListItem[]): WikiNode[] {
@@ -514,8 +515,8 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
 
   // ─── Document CRUD ───────────────────────────────────────────
   const handleCreateNote = async (targetPath: string = '/') => {
-    const t = getToken()
-    if (!t || !userId) return
+    const t = isLocal ? '' : getToken()
+    if (!isLocal && (!t || !userId)) return
     try {
       const data = await apiFetch<DocumentListItem>(`/v1/knowledge-bases/${kbId}/documents/note`, t, {
         method: 'POST',
@@ -532,8 +533,8 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
   }
 
   const handleCreateFolder = (folderName: string, parentPath: string = '/') => {
-    const t = getToken()
-    if (!t || !userId) return
+    const t = isLocal ? '' : getToken()
+    if (!isLocal && (!t || !userId)) return
     const path = parentPath.replace(/\/$/, '') + '/' + folderName + '/'
     apiFetch<DocumentListItem>(`/v1/knowledge-bases/${kbId}/documents/note`, t, {
       method: 'POST',
@@ -550,8 +551,8 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
   }
 
   const handleMoveDocument = async (docId: string, targetPath: string) => {
-    const t = getToken()
-    if (!t) return
+    const t = isLocal ? '' : getToken()
+    if (!isLocal && !t) return
     try {
       await apiFetch(`/v1/documents/${docId}`, t, { method: 'PATCH', body: JSON.stringify({ path: targetPath }) })
       setDocuments((prev) => prev.map((d) => d.id === docId ? { ...d, path: targetPath } : d))
@@ -605,8 +606,8 @@ export function KBDetail({ kbId, kbSlug, kbName, viewMode, routeFilesPath }: Pro
   }, [kbId, tkb])
 
   const uploadFiles = React.useCallback((files: File[], targetPath: string = '/') => {
-    const t = getToken()
-    if (!t || !userId) return
+    const t = isLocal ? '' : getToken()
+    if (!isLocal && (!t || !userId)) return
 
     // Client-side duplicate check — documents are already loaded
     const existingNames = new Set(
