@@ -25,16 +25,26 @@ export interface TocItem {
 
 export function extractTocFromMarkdown(md: string): TocItem[] {
   const items: TocItem[] = []
+  const seen = new Map<string, number>()
   const lines = md.split('\n')
   for (const line of lines) {
     const m2 = line.match(/^##\s+(.+)/)
     const m3 = line.match(/^###\s+(.+)/)
-    if (m2) {
-      const text = m2[1].replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim()
-      items.push({ id: slugify(text), text, level: 2 })
-    } else if (m3) {
-      const text = m3[1].replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim()
-      items.push({ id: slugify(text), text, level: 3 })
+    let match: RegExpMatchArray | null = null
+    let level: 2 | 3 = 2
+    if (m2) { match = m2; level = 2 }
+    else if (m3) { match = m3; level = 3 }
+    if (match) {
+      const text = match[1].replace(/\*\*/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim()
+      let id = slugify(text) || `heading-${items.length}`
+      const count = seen.get(id)
+      if (count !== undefined) {
+        seen.set(id, count + 1)
+        id = `${id}-${count + 1}`
+      } else {
+        seen.set(id, 0)
+      }
+      items.push({ id, text, level })
     }
   }
   return items
@@ -43,7 +53,7 @@ export function extractTocFromMarkdown(md: string): TocItem[] {
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
@@ -354,6 +364,11 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
   const t = useTranslations('wikiContent')
   const processedContent = React.useMemo(() => stripLeadingH1(content, title), [content, title])
   const tocItems = React.useMemo(() => extractTocFromMarkdown(processedContent), [processedContent])
+  const tocIdMap = React.useMemo(() => {
+    const map = new Map<string, string>()
+    for (const item of tocItems) map.set(item.text, item.id)
+    return map
+  }, [tocItems])
   const footnoteSources = React.useMemo(() => parseFootnoteSources(processedContent), [processedContent])
   const [copied, setCopied] = React.useState(false)
 
@@ -379,7 +394,7 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
     () => ({
       h1({ children }) {
         const text = childrenToText(children)
-        const id = slugify(text)
+        const id = tocIdMap.get(text) || slugify(text) || `h-${text.length}`
         return (
           <h1 id={id} className="text-2xl font-bold tracking-tight mt-8 mb-3 first:mt-0 scroll-mt-20">
             {children}
@@ -388,7 +403,7 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
       },
       h2({ children }) {
         const text = childrenToText(children)
-        const id = slugify(text)
+        const id = tocIdMap.get(text) || slugify(text) || `h-${text.length}`
         return (
           <h2 id={id} className="text-xl font-semibold tracking-tight mt-6 mb-2 pt-2 border-t border-border/50 first:border-0 first:pt-0 scroll-mt-20">
             {children}
@@ -397,7 +412,7 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
       },
       h3({ children }) {
         const text = childrenToText(children)
-        const id = slugify(text)
+        const id = tocIdMap.get(text) || slugify(text) || `h-${text.length}`
         return (
           <h3 id={id} className="text-lg font-medium tracking-tight mt-6 mb-1.5 scroll-mt-20">
             {children}
@@ -406,7 +421,7 @@ export function WikiContent({ content, title, onNavigate, onSourceClick, onGraph
       },
       h4({ children }) {
         const text = childrenToText(children)
-        const id = slugify(text)
+        const id = tocIdMap.get(text) || slugify(text) || `h-${text.length}`
         return (
           <h4 id={id} className="text-base font-medium mt-5 mb-1 scroll-mt-20">
             {children}
