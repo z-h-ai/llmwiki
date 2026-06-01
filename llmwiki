@@ -48,7 +48,7 @@ def cmd_init(workspace: str) -> None:
 
     # Initialize SQLite
     import sqlite3
-    schema_path = API_DIR / "infra" / "db" / "sqlite_schema.sql"
+    schema_path = REPO_ROOT / "shared" / "sqlite_schema.sql"
     if not schema_path.exists():
         print(f"Error: schema not found at {schema_path}", file=sys.stderr)
         sys.exit(1)
@@ -253,9 +253,11 @@ def cmd_mcp(workspace: str) -> None:
     if not (ws / ".llmwiki" / "index.db").exists():
         cmd_init(str(ws))
 
-    os.execvp(
+    os.chdir(MCP_DIR)
+    os.execvpe(
         sys.executable,
         [sys.executable, "-m", "local_server", "--workspace", str(ws)],
+        os.environ.copy(),
     )
 
 

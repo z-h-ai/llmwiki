@@ -1,11 +1,35 @@
 """Unit tests for MCP tool helpers and reference parsing. Pure functions, no DB."""
 
-import os
+from pathlib import Path
 import sys
 
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "mcp"))
+
+MCP_DIR = Path(__file__).resolve().parents[3] / "mcp"
+MCP_MODULE_PREFIXES = ("config", "db", "services", "tools", "vaultfs")
+
+
+@pytest.fixture(autouse=True)
+def mcp_import_path(monkeypatch):
+    saved_modules = {
+        module_name: module
+        for module_name, module in sys.modules.items()
+        if module_name in MCP_MODULE_PREFIXES
+        or module_name.startswith(tuple(f"{prefix}." for prefix in MCP_MODULE_PREFIXES))
+    }
+    for module_name in saved_modules:
+        sys.modules.pop(module_name, None)
+
+    monkeypatch.syspath_prepend(str(MCP_DIR))
+    yield
+    for module_name in list(sys.modules):
+        if (
+            module_name in MCP_MODULE_PREFIXES
+            or module_name.startswith(tuple(f"{prefix}." for prefix in MCP_MODULE_PREFIXES))
+        ):
+            sys.modules.pop(module_name, None)
+    sys.modules.update(saved_modules)
 
 
 class TestDeepLink:
