@@ -365,5 +365,13 @@
     "daysAgo": "{count}d ago",
     "monthsAgo": "{count}mo ago",
     "yearsAgo": "{count}y ago"
+  },
+  "sync": {
+    "syncing": "Syncing {details} ({progress})",
+    "syncComplete": "Sync complete",
+    "newFiles": "{count, plural, =1 {1 new file} other {# new files}}",
+    "modifiedFiles": "{count, plural, =1 {1 modified} other {# modified}}",
+    "deletedFiles": "{count, plural, =1 {1 deleted} other {# deleted}}",
+    "separator": ", "
   }
 }

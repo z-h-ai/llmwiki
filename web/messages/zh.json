@@ -365,5 +365,13 @@
     "daysAgo": "{count} 天前",
     "monthsAgo": "{count} 个月前",
     "yearsAgo": "{count} 年前"
+  },
+  "sync": {
+    "syncing": "正在同步 {details}（{progress}）",
+    "syncComplete": "同步完成",
+    "newFiles": "{count} 个新文件",
+    "modifiedFiles": "{count} 个修改",
+    "deletedFiles": "{count} 个删除",
+    "separator": "、"
   }
 }
