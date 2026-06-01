@@ -206,7 +206,7 @@ if settings.MODE != "local":
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.APP_URL],
+    allow_origins=["*"] if settings.MODE == "local" else [settings.APP_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
