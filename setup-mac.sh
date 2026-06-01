@@ -50,5 +50,9 @@ else
   (cd "$ROOT_DIR/web" && npm install)
 fi
 
+mkdir -p "$WORKSPACE/.llmwiki"
+echo "Writing MCP config snippet..."
+"$ROOT_DIR/llmwiki" mcp-config "$WORKSPACE" | tee "$WORKSPACE/.llmwiki/mcp-config.txt"
+
 echo "Initializing and starting workspace: $WORKSPACE"
 "$ROOT_DIR/llmwiki" open "$WORKSPACE"

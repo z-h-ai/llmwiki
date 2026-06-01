@@ -51,5 +51,10 @@ finally {
   Pop-Location
 }
 
+New-Item -ItemType Directory -Force -Path (Join-Path $Workspace ".llmwiki") | Out-Null
+$McpConfigPath = Join-Path (Join-Path $Workspace ".llmwiki") "mcp-config.txt"
+Write-Host "Writing MCP config snippet..."
+& python (Join-Path $RootDir "llmwiki") mcp-config $Workspace | Tee-Object -FilePath $McpConfigPath
+
 Write-Host "Initializing and starting workspace: $Workspace"
 & python (Join-Path $RootDir "llmwiki") open $Workspace

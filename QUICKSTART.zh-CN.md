@@ -29,6 +29,7 @@ Windows：
 - 安装 MCP 依赖
 - 安装前端依赖
 - 初始化工作区
+- 生成 MCP 配置片段
 - 启动本地服务
 
 启动后会打开本地页面：
@@ -68,13 +69,13 @@ mv ~/notes ~/research/
 - Claude Code
 - 其他支持 MCP 的工具
 
-先生成配置：
+setup 脚本会把 MCP 配置片段写到 `.llmwiki/mcp-config.txt`，你也可以重新生成：
 
 ```bash
 ./llmwiki mcp-config ~/research
 ```
 
-把输出的 JSON 粘贴到对应工具的 MCP 配置入口里。
+把输出的内容粘贴到对应工具的 MCP 配置入口里。
 
 ## 5. AI 第一轮怎么说
 
