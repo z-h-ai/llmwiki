@@ -35,6 +35,22 @@ TEXT_EXTENSIONS = frozenset({
 COOLDOWN_SECONDS = 2.0
 
 _ignore_patterns: list[str] | None = None
+_file_locks: dict[str, asyncio.Lock] = {}
+
+# Module-level sync status for the /v1/sync-status endpoint
+_sync_status: dict = {
+    "syncing": False,
+    "new": 0,
+    "modified": 0,
+    "deleted": 0,
+    "scanned": 0,
+    "total": 0,
+}
+
+
+def get_sync_status() -> dict:
+    """Return a copy of the current sync status."""
+    return dict(_sync_status)
 
 
 def _load_ignore_patterns(workspace: Path) -> list[str]:
@@ -118,8 +134,29 @@ def _get_source_kind(relative_path: str) -> str:
     return "source"
 
 
+def _file_lock_key(workspace: Path, file_path: Path) -> str:
+    try:
+        return str(file_path.relative_to(workspace))
+    except ValueError:
+        return str(file_path.resolve())
+
+
+def _get_file_lock(workspace: Path, file_path: Path) -> asyncio.Lock:
+    key = _file_lock_key(workspace, file_path)
+    lock = _file_locks.get(key)
+    if lock is None:
+        lock = asyncio.Lock()
+        _file_locks[key] = lock
+    return lock
+
+
 async def _index_file(db: aiosqlite.Connection, workspace: Path, file_path: Path) -> None:
     """Index or re-index a single file."""
+    async with _get_file_lock(workspace, file_path):
+        await _index_file_locked(db, workspace, file_path)
+
+
+async def _index_file_locked(db: aiosqlite.Connection, workspace: Path, file_path: Path) -> None:
     relative = str(file_path.relative_to(workspace))
     filename = file_path.name
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
@@ -154,14 +191,19 @@ async def _index_file(db: aiosqlite.Connection, workspace: Path, file_path: Path
 
     # Check if document already exists at this path
     cursor = await db.execute(
-        "SELECT id, content_hash FROM documents WHERE relative_path = ?",
+        "SELECT id, content_hash, file_size, mtime_ns FROM documents WHERE relative_path = ?",
         (relative,),
     )
     existing = await cursor.fetchone()
 
     if existing:
-        doc_id, old_hash = existing
-        if old_hash == content_hash:
+        doc_id, old_hash, old_size, old_mtime_ns = existing
+        unchanged = (
+            old_hash == content_hash
+            if old_hash is not None and content_hash is not None
+            else old_size == stat.st_size and old_mtime_ns == int(stat.st_mtime_ns)
+        )
+        if unchanged:
             return  # No change
         # Update existing
         await db.execute(
@@ -211,6 +253,11 @@ async def _index_file(db: aiosqlite.Connection, workspace: Path, file_path: Path
 
 async def _remove_file(db: aiosqlite.Connection, workspace: Path, file_path: Path) -> None:
     """Remove a file from the index."""
+    async with _get_file_lock(workspace, file_path):
+        await _remove_file_locked(db, workspace, file_path)
+
+
+async def _remove_file_locked(db: aiosqlite.Connection, workspace: Path, file_path: Path) -> None:
     try:
         relative = str(file_path.relative_to(workspace))
     except ValueError:
@@ -262,3 +309,107 @@ async def watch_workspace(db: aiosqlite.Connection, workspace: Path) -> None:
         expired = [k for k, v in _recently_written.items() if now - v > COOLDOWN_SECONDS * 2]
         for k in expired:
             _recently_written.pop(k, None)
+
+
+async def reconcile(db: aiosqlite.Connection, workspace: Path) -> None:
+    """Startup reconcile: compare disk to DB for wiki/ and sources/ dirs.
+
+    Detects new files, modified files (by content_hash), and deleted files.
+    Runs once at startup, in parallel with the watchfiles watcher.
+    """
+    global _sync_status
+    _sync_status = {
+        "syncing": True,
+        "new": 0,
+        "modified": 0,
+        "deleted": 0,
+        "scanned": 0,
+        "total": 0,
+    }
+
+    try:
+        # 1. Load all tracked files from DB
+        cursor = await db.execute(
+            "SELECT relative_path, content_hash, file_size, mtime_ns FROM documents"
+        )
+        rows = await cursor.fetchall()
+        db_files: dict[str, tuple[str | None, int | None, int | None]] = {
+            row[0]: (row[1], row[2], row[3]) for row in rows
+        }
+
+        # 2. Collect all files on disk under wiki/ and sources/
+        disk_files: dict[str, Path] = {}
+        for scan_dir in ("wiki", "sources"):
+            dir_path = workspace / scan_dir
+            if not dir_path.is_dir():
+                continue
+            for root, dirs, files in os.walk(dir_path):
+                # Apply same ignore filtering as watcher
+                rel_root = Path(root).relative_to(workspace)
+                if any(p in IGNORE_DIRS or p.startswith(".") for p in rel_root.parts):
+                    dirs.clear()
+                    continue
+                dirs[:] = [d for d in dirs if d not in IGNORE_DIRS and not d.startswith(".")]
+
+                for fname in files:
+                    if fname.startswith("."):
+                        continue
+                    full_path = Path(root) / fname
+                    if _should_ignore(full_path, workspace):
+                        continue
+                    relative = str(full_path.relative_to(workspace))
+                    disk_files[relative] = full_path
+
+        _sync_status["total"] = len(disk_files)
+
+        # 3. Detect deleted files (in DB but not on disk)
+        disk_relative = set(disk_files.keys())
+        for relative in set(db_files.keys()) - disk_relative:
+            if not (relative.startswith("wiki/") or relative.startswith("sources/")):
+                continue
+            try:
+                await _remove_file(db, workspace, workspace / relative)
+                _sync_status["deleted"] += 1
+            except Exception as e:
+                logger.warning("Reconcile: failed to remove %s: %s", relative, e)
+
+        # 4. Process all files on disk (new + modified)
+        for relative, full_path in disk_files.items():
+            _sync_status["scanned"] += 1
+            try:
+                if not full_path.is_file():
+                    continue
+
+                # Check if file is new or modified
+                if relative not in db_files:
+                    # New file
+                    await _index_file(db, workspace, full_path)
+                    _sync_status["new"] += 1
+                else:
+                    # Existing file — check hash, falling back to stat metadata
+                    old_hash, old_size, old_mtime_ns = db_files[relative]
+                    current_hash = None
+                    stat = full_path.stat()
+                    if stat.st_size < 100_000_000:
+                        try:
+                            current_hash = hashlib.sha256(full_path.read_bytes()).hexdigest()
+                        except Exception:
+                            pass
+                    changed = (
+                        current_hash != old_hash
+                        if current_hash is not None and old_hash is not None
+                        else old_size != stat.st_size or old_mtime_ns != int(stat.st_mtime_ns)
+                    )
+                    if changed:
+                        await _index_file(db, workspace, full_path)
+                        _sync_status["modified"] += 1
+            except Exception as e:
+                logger.warning("Reconcile: failed to index %s: %s", relative, e)
+
+        logger.info(
+            "Reconcile complete: %d new, %d modified, %d deleted, %d scanned",
+            _sync_status["new"], _sync_status["modified"],
+            _sync_status["deleted"], _sync_status["scanned"],
+        )
+    finally:
+        _sync_status["syncing"] = False

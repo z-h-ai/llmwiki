@@ -157,18 +157,28 @@ async def _local_lifespan(app: FastAPI):
 
     # Start file watcher
     watcher_task = None
+    reconcile_task = None
     try:
-        from domain.watcher import watch_workspace
+        from domain.watcher import watch_workspace, reconcile
         from pathlib import Path
         workspace = Path(app.state.workspace_path)
         watcher_task = asyncio.create_task(watch_workspace(db, workspace))
         logger.info("File watcher started")
+
+        # Startup reconcile: detect files changed while server was down
+        reconcile_task = asyncio.create_task(reconcile(db, workspace))
     except ImportError:
         logger.warning("watchfiles not installed — file watcher disabled")
 
     try:
         yield
     finally:
+        if reconcile_task:
+            reconcile_task.cancel()
+            try:
+                await reconcile_task
+            except asyncio.CancelledError:
+                pass
         if watcher_task:
             watcher_task.cancel()
             try:
@@ -221,9 +231,11 @@ if settings.MODE == "local":
     from routes.local_upload import router as local_upload_router
     from routes.files import router as files_router, set_workspace_root
     from routes.local_graph import router as local_graph_router
+    from routes.sync_status import router as sync_status_router
     app.include_router(local_upload_router)
     app.include_router(files_router)
     app.include_router(local_graph_router)
+    app.include_router(sync_status_router)
     set_workspace_root(settings.WORKSPACE_PATH)
 else:
     from routes.api_keys import router as api_keys_router
